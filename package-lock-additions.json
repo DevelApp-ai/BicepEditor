@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "prepare-package": "node scripts/prepare-package.js",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "blockly": "^10.0.0",
+    "simple-git": "^3.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "electron": "^23.1.0",
+    "electron-builder": "^23.6.0",
+    "typescript": "^4.9.5",
+    "ts-loader": "^9.4.2",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.1"
+  }
+}
