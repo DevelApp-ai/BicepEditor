@@ -74,7 +74,7 @@ export class FeatureFlagBlockManager {
       // @ts-ignore - toolboxDef is not in the type definitions
       const toolboxDef = toolbox.getToolboxDef();
       toolboxDef.contents.push(featureFlagCategory);
-      toolbox.render();
+      toolbox.render(toolboxDef);
     }
   }
 
@@ -125,7 +125,7 @@ export class FeatureFlagBlockManager {
       toolboxDef.contents = toolboxDef.contents.filter((category: any) => 
         category.name !== 'Feature Flags'
       );
-      toolbox.render();
+      toolbox.render(toolboxDef);
     }
 
     // Create new feature flag blocks

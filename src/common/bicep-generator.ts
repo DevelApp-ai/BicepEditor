@@ -25,27 +25,27 @@ export class BicepGenerator {
    */
   private initializeCodeGenerator(): void {
     // Create a custom generator for Bicep
-    const bicepGenerator = new Blockly.Generator('Bicep');
+    const bicepGenerator = new (Blockly as any).CodeGenerator('Bicep');
     
     // Define order of operations
-    bicepGenerator.ORDER_ATOMIC = 0;
-    bicepGenerator.ORDER_MEMBER = 1;
-    bicepGenerator.ORDER_FUNCTION_CALL = 2;
-    bicepGenerator.ORDER_MULTIPLICATIVE = 3;
-    bicepGenerator.ORDER_ADDITIVE = 4;
-    bicepGenerator.ORDER_RELATIONAL = 5;
-    bicepGenerator.ORDER_LOGICAL_NOT = 6;
-    bicepGenerator.ORDER_LOGICAL_AND = 7;
-    bicepGenerator.ORDER_LOGICAL_OR = 8;
-    bicepGenerator.ORDER_CONDITIONAL = 9;
-    bicepGenerator.ORDER_ASSIGNMENT = 10;
-    bicepGenerator.ORDER_NONE = 99;
+    (bicepGenerator as any).ORDER_ATOMIC = 0;
+    (bicepGenerator as any).ORDER_MEMBER = 1;
+    (bicepGenerator as any).ORDER_FUNCTION_CALL = 2;
+    (bicepGenerator as any).ORDER_MULTIPLICATIVE = 3;
+    (bicepGenerator as any).ORDER_ADDITIVE = 4;
+    (bicepGenerator as any).ORDER_RELATIONAL = 5;
+    (bicepGenerator as any).ORDER_LOGICAL_NOT = 6;
+    (bicepGenerator as any).ORDER_LOGICAL_AND = 7;
+    (bicepGenerator as any).ORDER_LOGICAL_OR = 8;
+    (bicepGenerator as any).ORDER_CONDITIONAL = 9;
+    (bicepGenerator as any).ORDER_ASSIGNMENT = 10;
+    (bicepGenerator as any).ORDER_NONE = 99;
 
     // Define how to generate code for each block type
     this.defineBlockGenerators(bicepGenerator);
 
     // Store the generator in the Blockly namespace
-    Blockly.Bicep = bicepGenerator;
+    (Blockly as any).Bicep = bicepGenerator;
   }
 
   /**
@@ -214,7 +214,7 @@ export class BicepGenerator {
     code += `// Generated on: ${new Date().toISOString()}\n\n`;
     
     // Generate code from workspace
-    code += Blockly.Bicep.workspaceToCode(this.workspace);
+    code += (Blockly as any).Bicep.workspaceToCode(this.workspace);
     
     return code;
   }

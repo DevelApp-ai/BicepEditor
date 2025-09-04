@@ -41,25 +41,38 @@ For detailed installation instructions, see the [Installation Guide](docs/instal
 ### Setup
 
 1. Clone the repository:
-   ```
-   git clone https://github.com/example/bicep-blockly-editor.git
-   cd bicep-blockly-editor
+   ```bash
+   git clone https://github.com/DevelApp-ai/BicepEditor.git
+   cd BicepEditor
    ```
 
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
 
 3. Build the application:
-   ```
+   ```bash
    npm run build
    ```
 
 4. Start the application in development mode:
-   ```
+   ```bash
    npm run dev
    ```
+
+### Project Structure
+
+```
+├── src/
+│   ├── main/           # Main Electron process
+│   ├── renderer/       # Renderer process (UI)
+│   └── common/         # Shared code and types
+├── tests/              # Test files
+├── docs/               # Documentation
+├── scripts/            # Build and utility scripts
+└── .github/workflows/  # CI/CD pipelines
+```
 
 ### Testing
 
@@ -111,6 +124,25 @@ The Bicep Blockly Editor follows a standard Electron application architecture wi
 ```
 
 For more details, see the [Developer Guide](docs/developer_guide.md).
+
+## CI/CD
+
+This project includes automated CI/CD pipelines that:
+
+- ✅ Run on multiple platforms (Windows, macOS, Linux)
+- ✅ Perform type checking and linting  
+- ✅ Build and test the application
+- ✅ Package for distribution
+
+## Contributing
+
+We welcome contributions! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests (`npm test`)
+5. Submit a pull request
 
 ## License
 
