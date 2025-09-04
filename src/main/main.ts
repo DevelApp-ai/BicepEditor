@@ -3,8 +3,9 @@ import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
 import { GitModuleAnalyzer } from './git-module-analyzer';
-import { FeatureFlagManager } from './feature-flag-manager';
+import { FeatureFlagManager } from '../common/feature-flag-manager';
 import { BicepFileManager } from './bicep-file-manager';
+import { RepositoryConfig, ModuleMetadata } from '../common/types';
 
 // Keep a global reference of the window object to avoid garbage collection
 let mainWindow: BrowserWindow | null = null;

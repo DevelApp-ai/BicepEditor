@@ -1,7 +1,7 @@
 import * as Blockly from 'blockly';
-import { BicepBlockFactory } from './bicep-blocks';
-import { BicepGenerator } from './bicep-generator';
-import { FeatureFlagBlockManager } from './feature-flag-blocks';
+import { BicepBlockFactory } from '../common/bicep-blocks';
+import { BicepGenerator } from '../common/bicep-generator';
+import { FeatureFlagBlockManager } from '../common/feature-flag-blocks';
 import { BicepCodeGenerationOptions } from '../common/types';
 
 /**
