@@ -30,8 +30,8 @@ contextBridge.exposeInMainWorld(
     // File operations
     saveBicepFile: (filePath: string, content: string) => 
       ipcRenderer.invoke('file-save-bicep', filePath, content),
-    openBicepFile: (filePath: string) => 
-      ipcRenderer.invoke('file-open-bicep', filePath),
+    openBicepFile: () => 
+      ipcRenderer.invoke('file-open-bicep'),
     
     // Event listeners
     on: (channel: string, callback: Function) => {

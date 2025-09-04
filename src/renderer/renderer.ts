@@ -13,8 +13,8 @@ declare global {
       listModules: (repoId: string) => Promise<any[]>;
       saveFeatureFlags: (environment: string, flags: any) => Promise<void>;
       loadFeatureFlags: (environment: string) => Promise<any>;
-      saveBicepFile: (filePath: string, content: string) => Promise<void>;
-      openBicepFile: (filePath: string) => Promise<string>;
+      saveBicepFile: (filePath: string, content: string) => Promise<{ path: string; success: boolean } | null>;
+      openBicepFile: () => Promise<{ path: string; content: string } | null>;
       on: (channel: string, callback: Function) => void;
       off: (channel: string, callback: Function) => void;
     };

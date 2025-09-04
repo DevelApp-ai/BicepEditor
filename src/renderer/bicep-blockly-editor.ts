@@ -4,6 +4,26 @@ import { BicepGenerator } from '../common/bicep-generator';
 import { FeatureFlagBlockManager } from '../common/feature-flag-blocks';
 import { BicepCodeGenerationOptions } from '../common/types';
 
+// Declare the API interface for TypeScript
+declare global {
+  interface Window {
+    api: {
+      getAppVersion: () => Promise<string>;
+      addRepository: (repoUrl: string, branch: string, auth: any) => Promise<any>;
+      refreshRepository: (repoId: string) => Promise<any>;
+      listRepositories: () => Promise<any[]>;
+      analyzeModule: (modulePath: string) => Promise<any>;
+      listModules: (repoId: string) => Promise<any[]>;
+      saveFeatureFlags: (environment: string, flags: any) => Promise<void>;
+      loadFeatureFlags: (environment: string) => Promise<any>;
+      saveBicepFile: (filePath: string, content: string) => Promise<{ path: string; success: boolean } | null>;
+      openBicepFile: () => Promise<{ path: string; content: string } | null>;
+      on: (channel: string, callback: Function) => void;
+      off: (channel: string, callback: Function) => void;
+    };
+  }
+}
+
 /**
  * BicepBlocklyEditor class for managing the Blockly editor for Bicep
  */
@@ -233,7 +253,7 @@ export class BicepBlocklyEditor {
   private async saveFile(): Promise<void> {
     try {
       const code = this.bicepGenerator.generateCode();
-      const result = await window.api.saveBicepFile(this.currentFilePath, code);
+      const result = await window.api.saveBicepFile(this.currentFilePath || '', code);
       if (!result) {
         return;
       }
@@ -291,7 +311,7 @@ export class BicepBlocklyEditor {
         });
         
         // Refresh toolbox
-        toolbox.render();
+        toolbox.render(toolboxDef);
       }
     }
   }
