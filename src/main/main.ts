@@ -2,10 +2,6 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
-import { GitModuleAnalyzer } from './git-module-analyzer';
-import { FeatureFlagManager } from '../common/feature-flag-manager';
-import { BicepFileManager } from './bicep-file-manager';
-import { RepositoryConfig, ModuleMetadata } from '../common/types';
 
 // Keep a global reference of the window object to avoid garbage collection
 let mainWindow: BrowserWindow | null = null;
@@ -23,11 +19,6 @@ const cachePath = path.join(appDataPath, 'cache');
 if (!fs.existsSync(cachePath)) {
   fs.mkdirSync(cachePath, { recursive: true });
 }
-
-// Initialize managers
-const gitModuleAnalyzer = new GitModuleAnalyzer(cachePath);
-const featureFlagManager = new FeatureFlagManager(appDataPath);
-const bicepFileManager = new BicepFileManager(appDataPath);
 
 function createWindow() {
   // Create the browser window

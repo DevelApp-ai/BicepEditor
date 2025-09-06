@@ -222,7 +222,7 @@ export class BicepBlockFactory {
     messageIndex++;
 
     // Add parameters
-    moduleMetadata.parameters.forEach((param: any, index: number) => {
+    moduleMetadata.parameters.forEach((param: any, _index: number) => {
       blockDef[`message${messageIndex}`] = `${param.name}: %1`;
 
       // Different input types based on parameter type

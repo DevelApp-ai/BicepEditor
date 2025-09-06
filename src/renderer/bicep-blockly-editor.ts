@@ -2,27 +2,26 @@ import * as Blockly from 'blockly';
 import { BicepBlockFactory } from '../common/bicep-blocks';
 import { BicepGenerator } from '../common/bicep-generator';
 import { FeatureFlagBlockManager } from '../common/feature-flag-blocks';
-import { BicepCodeGenerationOptions } from '../common/types';
 
 // Declare the API interface for TypeScript
 declare global {
   interface Window {
     api: {
       getAppVersion: () => Promise<string>;
-      addRepository: (repoUrl: string, branch: string, auth: any) => Promise<any>;
-      refreshRepository: (repoId: string) => Promise<any>;
+      addRepository: (_repoUrl: string, _branch: string, _auth: any) => Promise<any>;
+      refreshRepository: (_repoId: string) => Promise<any>;
       listRepositories: () => Promise<any[]>;
-      analyzeModule: (modulePath: string) => Promise<any>;
-      listModules: (repoId: string) => Promise<any[]>;
-      saveFeatureFlags: (environment: string, flags: any) => Promise<void>;
-      loadFeatureFlags: (environment: string) => Promise<any>;
+      analyzeModule: (_modulePath: string) => Promise<any>;
+      listModules: (_repoId: string) => Promise<any[]>;
+      saveFeatureFlags: (_environment: string, _flags: any) => Promise<void>;
+      loadFeatureFlags: (_environment: string) => Promise<any>;
       saveBicepFile: (
-        filePath: string,
-        content: string
+        _filePath: string,
+        _content: string
       ) => Promise<{ path: string; success: boolean } | null>;
       openBicepFile: () => Promise<{ path: string; content: string } | null>;
-      on: (channel: string, callback: Function) => void;
-      off: (channel: string, callback: Function) => void;
+      on: (_channel: string, _callback: Function) => void;
+      off: (_channel: string, _callback: Function) => void;
     };
   }
 }

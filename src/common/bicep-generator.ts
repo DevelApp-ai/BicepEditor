@@ -103,7 +103,7 @@ export class BicepGenerator {
 
     // Feature Flag block
     generator.forBlock['bicep_feature_flag'] = function (block: any) {
-      const flagName = block.getFieldValue('FLAG_NAME');
+      const _flagName = block.getFieldValue('FLAG_NAME');
       const environment = block.getFieldValue('ENVIRONMENT');
       const value = generator.valueToCode(block, 'FLAG_VALUE', generator.ORDER_ATOMIC) || 'false';
 
@@ -154,7 +154,7 @@ export class BicepGenerator {
    * @param generator Blockly generator
    */
   private defineModuleBlockGenerator(generator: any): void {
-    generator.forBlock['bicep_module'] = function (block: any, moduleType: string) {
+    generator.forBlock['bicep_module'] = function (block: any, _moduleType: string) {
       const moduleName = block.getFieldValue('MODULE_NAME');
       const modulePath = block.getFieldValue('MODULE_PATH') || './modules/default.bicep';
 

@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from 'electron';
+import { ipcMain } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as simpleGit from 'simple-git';
@@ -365,7 +365,7 @@ export class GitModuleAnalyzer {
 
     let match;
     while ((match = paramRegex.exec(content)) !== null) {
-      const [_, name, type, defaultValue] = match;
+      const [_fullMatch, name, type, defaultValue] = match;
 
       parameters.push({
         name,
@@ -389,7 +389,7 @@ export class GitModuleAnalyzer {
 
     let match;
     while ((match = outputRegex.exec(content)) !== null) {
-      const [_, name, type, value] = match;
+      const [_fullMatch, name, type, value] = match;
 
       outputs.push({
         name,
@@ -412,7 +412,7 @@ export class GitModuleAnalyzer {
 
     let match;
     while ((match = resourceRegex.exec(content)) !== null) {
-      const [_, name, type, apiVersion] = match;
+      const [_fullMatch, name, type, apiVersion] = match;
 
       resources.push({
         name,

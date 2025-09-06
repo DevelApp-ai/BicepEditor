@@ -1,25 +1,24 @@
 import * as Blockly from 'blockly';
-import { ipcRenderer } from 'electron';
 
 // Declare the API interface for TypeScript
 declare global {
   interface Window {
     api: {
       getAppVersion: () => Promise<string>;
-      addRepository: (repoUrl: string, branch: string, auth: any) => Promise<any>;
-      refreshRepository: (repoId: string) => Promise<any>;
+      addRepository: (_repoUrl: string, _branch: string, _auth: any) => Promise<any>;
+      refreshRepository: (_repoId: string) => Promise<any>;
       listRepositories: () => Promise<any[]>;
-      analyzeModule: (modulePath: string) => Promise<any>;
-      listModules: (repoId: string) => Promise<any[]>;
-      saveFeatureFlags: (environment: string, flags: any) => Promise<void>;
-      loadFeatureFlags: (environment: string) => Promise<any>;
+      analyzeModule: (_modulePath: string) => Promise<any>;
+      listModules: (_repoId: string) => Promise<any[]>;
+      saveFeatureFlags: (_environment: string, _flags: any) => Promise<void>;
+      loadFeatureFlags: (_environment: string) => Promise<any>;
       saveBicepFile: (
-        filePath: string,
-        content: string
+        _filePath: string,
+        _content: string
       ) => Promise<{ path: string; success: boolean } | null>;
       openBicepFile: () => Promise<{ path: string; content: string } | null>;
-      on: (channel: string, callback: Function) => void;
-      off: (channel: string, callback: Function) => void;
+      on: (_channel: string, _callback: Function) => void;
+      off: (_channel: string, _callback: Function) => void;
     };
   }
 }
@@ -91,7 +90,7 @@ function initializeBlockly() {
 }
 
 // Update the code preview panel with generated Bicep code
-function updateCodePreview(workspace: Blockly.WorkspaceSvg) {
+function updateCodePreview(_workspace: Blockly.WorkspaceSvg) {
   // This will be replaced with actual Bicep code generation
   const code =
     "param storageAccountName string\nparam location string = resourceGroup().location\n\nresource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {\n  name: storageAccountName\n  location: location\n  sku: {\n    name: 'Standard_LRS'\n  }\n  kind: 'StorageV2'\n}";
@@ -178,18 +177,6 @@ function setupTabSwitching() {
       }
     });
   });
-}
-
-// Log to console output
-function logToConsole(message: string, type: 'info' | 'warning' | 'error' = 'info') {
-  const consoleOutput = document.getElementById('consoleOutput');
-  if (consoleOutput) {
-    const logEntry = document.createElement('div');
-    logEntry.className = `log-entry log-${type}`;
-    logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-    consoleOutput.appendChild(logEntry);
-    consoleOutput.scrollTop = consoleOutput.scrollHeight;
-  }
 }
 
 // Initialize application version
