@@ -28,33 +28,36 @@ export class GitModuleAnalyzer {
    */
   private setupIpcHandlers(): void {
     // Add repository
-    ipcMain.handle('git-add-repository', async (event, repoUrl: string, branch: string, auth: any) => {
-      try {
-        const repoId = this.generateRepoId(repoUrl);
-        const repoConfig: RepositoryConfig = {
-          id: repoId,
-          name: this.extractRepoName(repoUrl),
-          url: repoUrl,
-          branch: branch || 'main',
-          auth: auth || { type: 'none' },
-          paths: ['/'],
-          refresh: { type: 'manual' }
-        };
-        
-        this.repositories.set(repoId, repoConfig);
-        await this.cloneRepository(repoConfig);
-        const modules = await this.scanForModules(repoConfig);
-        
-        return {
-          id: repoId,
-          name: repoConfig.name,
-          modules: modules.length
-        };
-      } catch (error) {
-        console.error('Error adding repository:', error);
-        throw error;
+    ipcMain.handle(
+      'git-add-repository',
+      async (event, repoUrl: string, branch: string, auth: any) => {
+        try {
+          const repoId = this.generateRepoId(repoUrl);
+          const repoConfig: RepositoryConfig = {
+            id: repoId,
+            name: this.extractRepoName(repoUrl),
+            url: repoUrl,
+            branch: branch || 'main',
+            auth: auth || { type: 'none' },
+            paths: ['/'],
+            refresh: { type: 'manual' },
+          };
+
+          this.repositories.set(repoId, repoConfig);
+          await this.cloneRepository(repoConfig);
+          const modules = await this.scanForModules(repoConfig);
+
+          return {
+            id: repoId,
+            name: repoConfig.name,
+            modules: modules.length,
+          };
+        } catch (error) {
+          console.error('Error adding repository:', error);
+          throw error;
+        }
       }
-    });
+    );
 
     // Refresh repository
     ipcMain.handle('git-refresh-repository', async (event, repoId: string) => {
@@ -63,14 +66,14 @@ export class GitModuleAnalyzer {
         if (!repoConfig) {
           throw new Error(`Repository with ID ${repoId} not found`);
         }
-        
+
         await this.pullRepository(repoConfig);
         const modules = await this.scanForModules(repoConfig);
-        
+
         return {
           id: repoId,
           name: repoConfig.name,
-          modules: modules.length
+          modules: modules.length,
         };
       } catch (error) {
         console.error('Error refreshing repository:', error);
@@ -87,7 +90,7 @@ export class GitModuleAnalyzer {
             id: id,
             name: repo.name,
             url: repo.url,
-            branch: repo.branch
+            branch: repo.branch,
           });
         }
         return repos;
@@ -108,7 +111,7 @@ export class GitModuleAnalyzer {
               name: module.moduleName,
               path: module.modulePath,
               parameters: module.parameters.length,
-              outputs: module.outputs.length
+              outputs: module.outputs.length,
             });
           }
         }
@@ -124,11 +127,11 @@ export class GitModuleAnalyzer {
       try {
         const moduleId = this.generateModuleId(modulePath);
         const module = this.moduleRegistry.get(moduleId);
-        
+
         if (!module) {
           throw new Error(`Module with path ${modulePath} not found`);
         }
-        
+
         return module;
       } catch (error) {
         console.error('Error analyzing module:', error);
@@ -143,7 +146,9 @@ export class GitModuleAnalyzer {
    * @returns Repository ID
    */
   private generateRepoId(repoUrl: string): string {
-    return Buffer.from(repoUrl).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    return Buffer.from(repoUrl)
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '');
   }
 
   /**
@@ -152,7 +157,9 @@ export class GitModuleAnalyzer {
    * @returns Module ID
    */
   private generateModuleId(modulePath: string): string {
-    return Buffer.from(modulePath).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    return Buffer.from(modulePath)
+      .toString('base64')
+      .replace(/[^a-zA-Z0-9]/g, '');
   }
 
   /**
@@ -162,7 +169,8 @@ export class GitModuleAnalyzer {
    */
   private extractRepoName(repoUrl: string): string {
     const urlParts = repoUrl.split('/');
-    const repoName = urlParts[urlParts.length - 1].replace('.git', '') || urlParts[urlParts.length - 2];
+    const repoName =
+      urlParts[urlParts.length - 1].replace('.git', '') || urlParts[urlParts.length - 2];
     return repoName;
   }
 
@@ -173,18 +181,18 @@ export class GitModuleAnalyzer {
    */
   private async cloneRepository(repo: RepositoryConfig): Promise<string> {
     const repoPath = path.join(this.cachePath, repo.id);
-    
+
     // Check if repository already exists
     if (fs.existsSync(repoPath)) {
       return this.pullRepository(repo);
     }
-    
+
     // Create directory if it doesn't exist
     fs.mkdirSync(repoPath, { recursive: true });
-    
+
     // Clone repository
     const git = simpleGit.default();
-    
+
     // Handle authentication
     if (repo.auth.type === 'pat') {
       // For PAT authentication, modify the URL to include the token
@@ -195,11 +203,11 @@ export class GitModuleAnalyzer {
       // For no authentication or SSH, use the URL as is
       await git.clone(repo.url, repoPath);
     }
-    
+
     // Checkout specific branch
     const localGit = simpleGit.default(repoPath);
     await localGit.checkout(repo.branch);
-    
+
     return repoPath;
   }
 
@@ -210,16 +218,16 @@ export class GitModuleAnalyzer {
    */
   private async pullRepository(repo: RepositoryConfig): Promise<string> {
     const repoPath = path.join(this.cachePath, repo.id);
-    
+
     // Check if repository exists
     if (!fs.existsSync(repoPath)) {
       return this.cloneRepository(repo);
     }
-    
+
     // Pull latest changes
     const git = simpleGit.default(repoPath);
     await git.pull('origin', repo.branch);
-    
+
     return repoPath;
   }
 
@@ -231,26 +239,26 @@ export class GitModuleAnalyzer {
   private async scanForModules(repo: RepositoryConfig): Promise<ModuleMetadata[]> {
     const repoPath = path.join(this.cachePath, repo.id);
     const modules: ModuleMetadata[] = [];
-    
+
     // Process each path in the repository
     for (const modulePath of repo.paths) {
       const fullPath = path.join(repoPath, modulePath);
-      
+
       // Check if path exists
       if (!fs.existsSync(fullPath)) {
         console.warn(`Path ${fullPath} does not exist in repository ${repo.name}`);
         continue;
       }
-      
+
       // Find all .bicep files
       const bicepFiles = this.findBicepFiles(fullPath);
-      
+
       // Analyze each file
       for (const file of bicepFiles) {
         try {
           const metadata = await this.analyzeBicepModule(file, repo);
           const moduleId = this.generateModuleId(file);
-          
+
           this.moduleRegistry.set(moduleId, metadata);
           modules.push(metadata);
         } catch (error) {
@@ -258,7 +266,7 @@ export class GitModuleAnalyzer {
         }
       }
     }
-    
+
     return modules;
   }
 
@@ -269,12 +277,12 @@ export class GitModuleAnalyzer {
    */
   private findBicepFiles(dir: string): string[] {
     const files: string[] = [];
-    
+
     const items = fs.readdirSync(dir, { withFileTypes: true });
-    
+
     for (const item of items) {
       const fullPath = path.join(dir, item.name);
-      
+
       if (item.isDirectory()) {
         // Recursively search subdirectories
         files.push(...this.findBicepFiles(fullPath));
@@ -282,7 +290,7 @@ export class GitModuleAnalyzer {
         files.push(fullPath);
       }
     }
-    
+
     return files;
   }
 
@@ -292,17 +300,20 @@ export class GitModuleAnalyzer {
    * @param repo Repository configuration
    * @returns Module metadata
    */
-  private async analyzeBicepModule(filePath: string, repo: RepositoryConfig): Promise<ModuleMetadata> {
+  private async analyzeBicepModule(
+    filePath: string,
+    repo: RepositoryConfig
+  ): Promise<ModuleMetadata> {
     // Read file content
     const content = fs.readFileSync(filePath, 'utf8');
-    
+
     // Extract module name from file path
     const moduleName = path.basename(filePath, '.bicep');
-    
+
     // Extract relative path from repository root
     const repoPath = path.join(this.cachePath, repo.id);
     const relativePath = filePath.replace(repoPath, '');
-    
+
     // Initialize metadata
     const metadata: ModuleMetadata = {
       moduleName,
@@ -312,9 +323,9 @@ export class GitModuleAnalyzer {
       parameters: this.extractParameters(content),
       outputs: this.extractOutputs(content),
       resources: this.extractResources(content),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
     };
-    
+
     return metadata;
   }
 
@@ -327,10 +338,10 @@ export class GitModuleAnalyzer {
     // Look for a comment at the beginning of the file
     const lines = content.split('\n');
     let description = '';
-    
+
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       if (trimmed.startsWith('//')) {
         // Add comment to description
         description += trimmed.substring(2).trim() + ' ';
@@ -339,7 +350,7 @@ export class GitModuleAnalyzer {
         break;
       }
     }
-    
+
     return description.trim() || undefined;
   }
 
@@ -351,19 +362,19 @@ export class GitModuleAnalyzer {
   private extractParameters(content: string): any[] {
     const parameters: any[] = [];
     const paramRegex = /param\s+(\w+)\s+(\w+)(?:\s*=\s*(.+))?/g;
-    
+
     let match;
     while ((match = paramRegex.exec(content)) !== null) {
       const [_, name, type, defaultValue] = match;
-      
+
       parameters.push({
         name,
         type,
         required: !defaultValue,
-        defaultValue: defaultValue ? defaultValue.trim() : undefined
+        defaultValue: defaultValue ? defaultValue.trim() : undefined,
       });
     }
-    
+
     return parameters;
   }
 
@@ -375,18 +386,18 @@ export class GitModuleAnalyzer {
   private extractOutputs(content: string): any[] {
     const outputs: any[] = [];
     const outputRegex = /output\s+(\w+)\s+(\w+)\s*=\s*(.+)/g;
-    
+
     let match;
     while ((match = outputRegex.exec(content)) !== null) {
       const [_, name, type, value] = match;
-      
+
       outputs.push({
         name,
         type,
-        value: value.trim()
+        value: value.trim(),
       });
     }
-    
+
     return outputs;
   }
 
@@ -398,18 +409,18 @@ export class GitModuleAnalyzer {
   private extractResources(content: string): any[] {
     const resources: any[] = [];
     const resourceRegex = /resource\s+(\w+)\s+'([^']+)@([^']+)'/g;
-    
+
     let match;
     while ((match = resourceRegex.exec(content)) !== null) {
       const [_, name, type, apiVersion] = match;
-      
+
       resources.push({
         name,
         type,
-        apiVersion
+        apiVersion,
       });
     }
-    
+
     return resources;
   }
 }

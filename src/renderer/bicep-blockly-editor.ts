@@ -16,7 +16,10 @@ declare global {
       listModules: (repoId: string) => Promise<any[]>;
       saveFeatureFlags: (environment: string, flags: any) => Promise<void>;
       loadFeatureFlags: (environment: string) => Promise<any>;
-      saveBicepFile: (filePath: string, content: string) => Promise<{ path: string; success: boolean } | null>;
+      saveBicepFile: (
+        filePath: string,
+        content: string
+      ) => Promise<{ path: string; success: boolean } | null>;
       openBicepFile: () => Promise<{ path: string; content: string } | null>;
       on: (channel: string, callback: Function) => void;
       off: (channel: string, callback: Function) => void;
@@ -42,7 +45,7 @@ export class BicepBlocklyEditor {
     this.bicepGenerator = new BicepGenerator(this.workspace, {
       environment: 'development',
       indentation: '  ',
-      includeComments: true
+      includeComments: true,
     });
     this.featureFlagManager = new FeatureFlagBlockManager(this.workspace);
     this.setupEventListeners();
@@ -64,17 +67,17 @@ export class BicepBlocklyEditor {
           contents: [
             {
               kind: 'block',
-              type: 'bicep_storage_account'
+              type: 'bicep_storage_account',
             },
             {
               kind: 'block',
-              type: 'bicep_virtual_network'
+              type: 'bicep_virtual_network',
             },
             {
               kind: 'block',
-              type: 'bicep_conditional_deployment'
-            }
-          ]
+              type: 'bicep_conditional_deployment',
+            },
+          ],
         },
         {
           kind: 'category',
@@ -83,9 +86,9 @@ export class BicepBlocklyEditor {
           contents: [
             {
               kind: 'block',
-              type: 'bicep_string_literal'
-            }
-          ]
+              type: 'bicep_string_literal',
+            },
+          ],
         },
         {
           kind: 'category',
@@ -93,9 +96,9 @@ export class BicepBlocklyEditor {
           colour: '#5CA65C',
           contents: [
             // Will be populated with module blocks from repositories
-          ]
-        }
-      ]
+          ],
+        },
+      ],
     };
 
     // Inject Blockly into the workspace div
@@ -105,7 +108,7 @@ export class BicepBlocklyEditor {
         spacing: 20,
         length: 3,
         colour: '#ccc',
-        snap: true
+        snap: true,
       },
       zoom: {
         controls: true,
@@ -113,9 +116,9 @@ export class BicepBlocklyEditor {
         startScale: 1.0,
         maxScale: 3,
         minScale: 0.3,
-        scaleSpeed: 1.2
+        scaleSpeed: 1.2,
       },
-      trashcan: true
+      trashcan: true,
     });
   }
 
@@ -196,7 +199,7 @@ export class BicepBlocklyEditor {
     this.bicepGenerator = new BicepGenerator(this.workspace, {
       environment,
       indentation: '  ',
-      includeComments: true
+      includeComments: true,
     });
 
     // Update code preview
@@ -289,27 +292,27 @@ export class BicepBlocklyEditor {
   public addModuleBlock(moduleMetadata: any): void {
     // Create block definition
     const blockDef = BicepBlockFactory.createModuleBlockDefinition(moduleMetadata);
-    
+
     // Register block
     BicepBlockFactory.registerModuleBlock(blockDef);
-    
+
     // Add to toolbox
     const toolbox = this.workspace.getToolbox();
     if (toolbox) {
       // Find modules category
       // @ts-ignore - toolboxDef is not in the type definitions
       const toolboxDef = toolbox.getToolboxDef();
-      const modulesCategory = toolboxDef.contents.find((category: any) => 
-        category.name === 'Modules'
+      const modulesCategory = toolboxDef.contents.find(
+        (category: any) => category.name === 'Modules'
       );
-      
+
       if (modulesCategory) {
         // Add block to category
         modulesCategory.contents.push({
           kind: 'block',
-          type: blockDef.type
+          type: blockDef.type,
         });
-        
+
         // Refresh toolbox
         toolbox.render(toolboxDef);
       }

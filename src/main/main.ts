@@ -37,8 +37,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, 'preload.js'),
+    },
   });
 
   // Load the index.html file
@@ -46,7 +46,7 @@ function createWindow() {
     url.format({
       pathname: path.join(__dirname, '../index.html'),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
   );
 
@@ -88,6 +88,6 @@ ipcMain.handle('app-version', () => {
 ipcMain.handle('app-get-paths', () => {
   return {
     appData: appDataPath,
-    cache: cachePath
+    cache: cachePath,
   };
 });

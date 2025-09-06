@@ -13,7 +13,10 @@ declare global {
       listModules: (repoId: string) => Promise<any[]>;
       saveFeatureFlags: (environment: string, flags: any) => Promise<void>;
       loadFeatureFlags: (environment: string) => Promise<any>;
-      saveBicepFile: (filePath: string, content: string) => Promise<{ path: string; success: boolean } | null>;
+      saveBicepFile: (
+        filePath: string,
+        content: string
+      ) => Promise<{ path: string; success: boolean } | null>;
       openBicepFile: () => Promise<{ path: string; content: string } | null>;
       on: (channel: string, callback: Function) => void;
       off: (channel: string, callback: Function) => void;
@@ -40,7 +43,7 @@ function initializeBlockly() {
         colour: '#5C81A6',
         contents: [
           // Will be populated with core Bicep blocks
-        ]
+        ],
       },
       {
         kind: 'category',
@@ -48,7 +51,7 @@ function initializeBlockly() {
         colour: '#5CA65C',
         contents: [
           // Will be populated with module blocks from repositories
-        ]
+        ],
       },
       {
         kind: 'category',
@@ -56,9 +59,9 @@ function initializeBlockly() {
         colour: '#A65C81',
         contents: [
           // Will be populated with feature flag blocks
-        ]
-      }
-    ]
+        ],
+      },
+    ],
   };
 
   // Inject Blockly into the workspace div
@@ -68,7 +71,7 @@ function initializeBlockly() {
       spacing: 20,
       length: 3,
       colour: '#ccc',
-      snap: true
+      snap: true,
     },
     zoom: {
       controls: true,
@@ -76,9 +79,9 @@ function initializeBlockly() {
       startScale: 1.0,
       maxScale: 3,
       minScale: 0.3,
-      scaleSpeed: 1.2
+      scaleSpeed: 1.2,
     },
-    trashcan: true
+    trashcan: true,
   });
 
   // Add change listener to update code preview
@@ -90,8 +93,9 @@ function initializeBlockly() {
 // Update the code preview panel with generated Bicep code
 function updateCodePreview(workspace: Blockly.WorkspaceSvg) {
   // This will be replaced with actual Bicep code generation
-  const code = 'param storageAccountName string\nparam location string = resourceGroup().location\n\nresource storageAccount \'Microsoft.Storage/storageAccounts@2021-04-01\' = {\n  name: storageAccountName\n  location: location\n  sku: {\n    name: \'Standard_LRS\'\n  }\n  kind: \'StorageV2\'\n}';
-  
+  const code =
+    "param storageAccountName string\nparam location string = resourceGroup().location\n\nresource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {\n  name: storageAccountName\n  location: location\n  sku: {\n    name: 'Standard_LRS'\n  }\n  kind: 'StorageV2'\n}";
+
   const codePreview = document.getElementById('generatedCode');
   if (codePreview) {
     codePreview.textContent = code;
