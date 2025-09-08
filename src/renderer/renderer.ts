@@ -85,12 +85,12 @@ function initializeBlockly() {
 
   // Add change listener to update code preview
   workspace.addChangeListener(() => {
-    updateCodePreview(workspace);
+    updateCodePreview();
   });
 }
 
 // Update the code preview panel with generated Bicep code
-function updateCodePreview(_workspace: Blockly.WorkspaceSvg) {
+function updateCodePreview() {
   // This will be replaced with actual Bicep code generation
   const code =
     "param storageAccountName string\nparam location string = resourceGroup().location\n\nresource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {\n  name: storageAccountName\n  location: location\n  sku: {\n    name: 'Standard_LRS'\n  }\n  kind: 'StorageV2'\n}";

@@ -365,7 +365,7 @@ export class GitModuleAnalyzer {
 
     let match;
     while ((match = paramRegex.exec(content)) !== null) {
-      const [_fullMatch, name, type, defaultValue] = match;
+      const [, name, type, defaultValue] = match;
 
       parameters.push({
         name,
@@ -389,7 +389,7 @@ export class GitModuleAnalyzer {
 
     let match;
     while ((match = outputRegex.exec(content)) !== null) {
-      const [_fullMatch, name, type, value] = match;
+      const [, name, type, value] = match;
 
       outputs.push({
         name,
@@ -412,7 +412,7 @@ export class GitModuleAnalyzer {
 
     let match;
     while ((match = resourceRegex.exec(content)) !== null) {
-      const [_fullMatch, name, type, apiVersion] = match;
+      const [, name, type, apiVersion] = match;
 
       resources.push({
         name,

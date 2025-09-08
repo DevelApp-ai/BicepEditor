@@ -128,7 +128,7 @@ export class BicepFileManager {
 
         try {
           // Run Bicep validation
-          const { stdout, stderr: _stderr } = await execAsync(`az bicep build --file ${tempFile}`);
+          const { stdout } = await execAsync(`az bicep build --file ${tempFile}`);
 
           // Clean up
           fs.unlinkSync(tempFile);

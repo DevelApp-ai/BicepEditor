@@ -138,7 +138,7 @@ export class FeatureFlagBlockManager {
    */
   public defineFeatureFlagGenerators(generator: any): void {
     this.featureFlags.forEach(flag => {
-      generator.forBlock[`feature_flag_${flag.name}`] = function (_block: any) {
+      generator.forBlock[`feature_flag_${flag.name}`] = function () {
         // Return the feature flag value based on the current environment
         let value: string;
 
