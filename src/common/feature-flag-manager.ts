@@ -53,27 +53,27 @@ export class FeatureFlagManager {
             name: 'enableHighAvailability',
             type: 'boolean',
             value: envName === 'production' || envName === 'staging',
-            description: 'Enable high availability features'
+            description: 'Enable high availability features',
           },
           {
             name: 'replicaCount',
             type: 'number',
-            value: envName === 'production' ? 3 : (envName === 'staging' ? 2 : 1),
-            description: 'Number of replicas to deploy'
+            value: envName === 'production' ? 3 : envName === 'staging' ? 2 : 1,
+            description: 'Number of replicas to deploy',
           },
           {
             name: 'enableGeoRedundancy',
             type: 'boolean',
             value: envName === 'production',
-            description: 'Enable geo-redundant storage'
+            description: 'Enable geo-redundant storage',
           },
           {
             name: 'storageTier',
             type: 'string',
             value: envName === 'production' ? 'Premium' : 'Standard',
-            description: 'Storage tier to use'
-          }
-        ]
+            description: 'Storage tier to use',
+          },
+        ],
       });
     });
   }
@@ -129,26 +129,29 @@ export class FeatureFlagManager {
     });
 
     // Save feature flags for an environment
-    ipcMain.handle('feature-flags-save', async (event, environment: string, flags: FeatureFlag[]) => {
-      try {
-        const env = this.environments.get(environment);
-        if (!env) {
-          // Create new environment if it doesn't exist
-          this.environments.set(environment, {
-            name: environment,
-            featureFlags: flags
-          });
-        } else {
-          // Update existing environment
-          env.featureFlags = flags;
+    ipcMain.handle(
+      'feature-flags-save',
+      async (event, environment: string, flags: FeatureFlag[]) => {
+        try {
+          const env = this.environments.get(environment);
+          if (!env) {
+            // Create new environment if it doesn't exist
+            this.environments.set(environment, {
+              name: environment,
+              featureFlags: flags,
+            });
+          } else {
+            // Update existing environment
+            env.featureFlags = flags;
+          }
+          this.saveEnvironments();
+          return true;
+        } catch (error) {
+          console.error('Error saving feature flags:', error);
+          throw error;
         }
-        this.saveEnvironments();
-        return true;
-      } catch (error) {
-        console.error('Error saving feature flags:', error);
-        throw error;
       }
-    });
+    );
 
     // List all environments
     ipcMain.handle('feature-flags-list-environments', async () => {
@@ -166,13 +169,13 @@ export class FeatureFlagManager {
         if (this.environments.has(environment)) {
           throw new Error(`Environment ${environment} already exists`);
         }
-        
+
         // Create new environment with default flags
         this.environments.set(environment, {
           name: environment,
-          featureFlags: []
+          featureFlags: [],
         });
-        
+
         this.saveEnvironments();
         return true;
       } catch (error) {
@@ -187,12 +190,12 @@ export class FeatureFlagManager {
         if (!this.environments.has(environment)) {
           throw new Error(`Environment ${environment} not found`);
         }
-        
+
         // Don't allow deleting default environments
         if (this.defaultEnvironments.includes(environment)) {
           throw new Error(`Cannot delete default environment ${environment}`);
         }
-        
+
         this.environments.delete(environment);
         this.saveEnvironments();
         return true;
@@ -227,7 +230,7 @@ export class FeatureFlagManager {
     if (!env) {
       return undefined;
     }
-    
+
     const flag = env.featureFlags.find(f => f.name === flagName);
     return flag ? flag.value : undefined;
   }

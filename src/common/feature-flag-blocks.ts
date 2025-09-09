@@ -54,17 +54,17 @@ export class FeatureFlagBlockManager {
       kind: 'category',
       name: 'Feature Flags',
       colour: '#A65C81',
-      contents: [] as any[]
+      contents: [] as any[],
     };
 
     // Add blocks for each feature flag
     this.featureFlags.forEach(flag => {
       const blockDef = this.createFeatureFlagBlockDefinition(flag);
       Blockly.common.defineBlocksWithJsonArray([blockDef]);
-      
+
       featureFlagCategory.contents.push({
         kind: 'block',
-        type: `feature_flag_${flag.name}`
+        type: `feature_flag_${flag.name}`,
       });
     });
 
@@ -74,7 +74,7 @@ export class FeatureFlagBlockManager {
       // @ts-ignore - toolboxDef is not in the type definitions
       const toolboxDef = toolbox.getToolboxDef();
       toolboxDef.contents.push(featureFlagCategory);
-      toolbox.render();
+      toolbox.render(toolboxDef);
     }
   }
 
@@ -89,7 +89,7 @@ export class FeatureFlagBlockManager {
       message0: `Feature Flag: ${flag.name}`,
       output: this.getOutputType(flag.type),
       colour: 290,
-      tooltip: flag.description || `Feature flag for ${flag.name}`
+      tooltip: flag.description || `Feature flag for ${flag.name}`,
     };
 
     return blockDef;
@@ -122,10 +122,10 @@ export class FeatureFlagBlockManager {
     if (toolbox) {
       // @ts-ignore - toolboxDef is not in the type definitions
       const toolboxDef = toolbox.getToolboxDef();
-      toolboxDef.contents = toolboxDef.contents.filter((category: any) => 
-        category.name !== 'Feature Flags'
+      toolboxDef.contents = toolboxDef.contents.filter(
+        (category: any) => category.name !== 'Feature Flags'
       );
-      toolbox.render();
+      toolbox.render(toolboxDef);
     }
 
     // Create new feature flag blocks
@@ -138,10 +138,10 @@ export class FeatureFlagBlockManager {
    */
   public defineFeatureFlagGenerators(generator: any): void {
     this.featureFlags.forEach(flag => {
-      generator.forBlock[`feature_flag_${flag.name}`] = function(block: any) {
+      generator.forBlock[`feature_flag_${flag.name}`] = function () {
         // Return the feature flag value based on the current environment
         let value: string;
-        
+
         switch (flag.type) {
           case 'boolean':
             value = flag.value ? 'true' : 'false';
@@ -155,7 +155,7 @@ export class FeatureFlagBlockManager {
           default:
             value = `'${JSON.stringify(flag.value)}'`;
         }
-        
+
         return [value, generator.ORDER_ATOMIC];
       };
     });

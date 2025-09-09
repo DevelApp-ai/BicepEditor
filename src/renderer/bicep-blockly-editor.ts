@@ -1,8 +1,30 @@
 import * as Blockly from 'blockly';
-import { BicepBlockFactory } from './bicep-blocks';
-import { BicepGenerator } from './bicep-generator';
-import { FeatureFlagBlockManager } from './feature-flag-blocks';
-import { BicepCodeGenerationOptions } from '../common/types';
+import { BicepBlockFactory } from '../common/bicep-blocks';
+import { BicepGenerator } from '../common/bicep-generator';
+import { FeatureFlagBlockManager } from '../common/feature-flag-blocks';
+
+// Declare the API interface for TypeScript
+declare global {
+  interface Window {
+    api: {
+      getAppVersion: () => Promise<string>;
+      addRepository: (_repoUrl: string, _branch: string, _auth: any) => Promise<any>;
+      refreshRepository: (_repoId: string) => Promise<any>;
+      listRepositories: () => Promise<any[]>;
+      analyzeModule: (_modulePath: string) => Promise<any>;
+      listModules: (_repoId: string) => Promise<any[]>;
+      saveFeatureFlags: (_environment: string, _flags: any) => Promise<void>;
+      loadFeatureFlags: (_environment: string) => Promise<any>;
+      saveBicepFile: (
+        _filePath: string,
+        _content: string
+      ) => Promise<{ path: string; success: boolean } | null>;
+      openBicepFile: () => Promise<{ path: string; content: string } | null>;
+      on: (_channel: string, _callback: Function) => void;
+      off: (_channel: string, _callback: Function) => void;
+    };
+  }
+}
 
 /**
  * BicepBlocklyEditor class for managing the Blockly editor for Bicep
@@ -22,7 +44,7 @@ export class BicepBlocklyEditor {
     this.bicepGenerator = new BicepGenerator(this.workspace, {
       environment: 'development',
       indentation: '  ',
-      includeComments: true
+      includeComments: true,
     });
     this.featureFlagManager = new FeatureFlagBlockManager(this.workspace);
     this.setupEventListeners();
@@ -44,17 +66,17 @@ export class BicepBlocklyEditor {
           contents: [
             {
               kind: 'block',
-              type: 'bicep_storage_account'
+              type: 'bicep_storage_account',
             },
             {
               kind: 'block',
-              type: 'bicep_virtual_network'
+              type: 'bicep_virtual_network',
             },
             {
               kind: 'block',
-              type: 'bicep_conditional_deployment'
-            }
-          ]
+              type: 'bicep_conditional_deployment',
+            },
+          ],
         },
         {
           kind: 'category',
@@ -63,9 +85,9 @@ export class BicepBlocklyEditor {
           contents: [
             {
               kind: 'block',
-              type: 'bicep_string_literal'
-            }
-          ]
+              type: 'bicep_string_literal',
+            },
+          ],
         },
         {
           kind: 'category',
@@ -73,9 +95,9 @@ export class BicepBlocklyEditor {
           colour: '#5CA65C',
           contents: [
             // Will be populated with module blocks from repositories
-          ]
-        }
-      ]
+          ],
+        },
+      ],
     };
 
     // Inject Blockly into the workspace div
@@ -85,7 +107,7 @@ export class BicepBlocklyEditor {
         spacing: 20,
         length: 3,
         colour: '#ccc',
-        snap: true
+        snap: true,
       },
       zoom: {
         controls: true,
@@ -93,9 +115,9 @@ export class BicepBlocklyEditor {
         startScale: 1.0,
         maxScale: 3,
         minScale: 0.3,
-        scaleSpeed: 1.2
+        scaleSpeed: 1.2,
       },
-      trashcan: true
+      trashcan: true,
     });
   }
 
@@ -176,7 +198,7 @@ export class BicepBlocklyEditor {
     this.bicepGenerator = new BicepGenerator(this.workspace, {
       environment,
       indentation: '  ',
-      includeComments: true
+      includeComments: true,
     });
 
     // Update code preview
@@ -233,7 +255,7 @@ export class BicepBlocklyEditor {
   private async saveFile(): Promise<void> {
     try {
       const code = this.bicepGenerator.generateCode();
-      const result = await window.api.saveBicepFile(this.currentFilePath, code);
+      const result = await window.api.saveBicepFile(this.currentFilePath || '', code);
       if (!result) {
         return;
       }
@@ -269,29 +291,29 @@ export class BicepBlocklyEditor {
   public addModuleBlock(moduleMetadata: any): void {
     // Create block definition
     const blockDef = BicepBlockFactory.createModuleBlockDefinition(moduleMetadata);
-    
+
     // Register block
     BicepBlockFactory.registerModuleBlock(blockDef);
-    
+
     // Add to toolbox
     const toolbox = this.workspace.getToolbox();
     if (toolbox) {
       // Find modules category
       // @ts-ignore - toolboxDef is not in the type definitions
       const toolboxDef = toolbox.getToolboxDef();
-      const modulesCategory = toolboxDef.contents.find((category: any) => 
-        category.name === 'Modules'
+      const modulesCategory = toolboxDef.contents.find(
+        (category: any) => category.name === 'Modules'
       );
-      
+
       if (modulesCategory) {
         // Add block to category
         modulesCategory.contents.push({
           kind: 'block',
-          type: blockDef.type
+          type: blockDef.type,
         });
-        
+
         // Refresh toolbox
-        toolbox.render();
+        toolbox.render(toolboxDef);
       }
     }
   }

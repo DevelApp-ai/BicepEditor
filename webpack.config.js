@@ -11,7 +11,12 @@ module.exports = [
         {
           test: /\.ts$/,
           include: /src/,
-          use: [{ loader: 'ts-loader' }]
+          use: [{ 
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true
+            }
+          }]
         }
       ]
     },
@@ -41,7 +46,12 @@ module.exports = [
         {
           test: /\.ts$/,
           include: /src/,
-          use: [{ loader: 'ts-loader' }]
+          use: [{ 
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: true
+            }
+          }]
         },
         {
           test: /\.css$/,

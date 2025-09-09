@@ -29,7 +29,7 @@ export class BicepFileManager {
    */
   private setupIpcHandlers(): void {
     // Open Bicep file
-    ipcMain.handle('file-open-bicep', async (event) => {
+    ipcMain.handle('file-open-bicep', async event => {
       try {
         const window = BrowserWindow.fromWebContents(event.sender);
         if (!window) {
@@ -40,9 +40,9 @@ export class BicepFileManager {
           title: 'Open Bicep File',
           filters: [
             { name: 'Bicep Files', extensions: ['bicep'] },
-            { name: 'All Files', extensions: ['*'] }
+            { name: 'All Files', extensions: ['*'] },
           ],
-          properties: ['openFile']
+          properties: ['openFile'],
         });
 
         if (result.canceled || result.filePaths.length === 0) {
@@ -51,12 +51,12 @@ export class BicepFileManager {
 
         const filePath = result.filePaths[0];
         const content = fs.readFileSync(filePath, 'utf8');
-        
+
         this.addRecentFile(filePath);
-        
+
         return {
           path: filePath,
-          content
+          content,
         };
       } catch (error) {
         console.error('Error opening Bicep file:', error);
@@ -69,7 +69,7 @@ export class BicepFileManager {
       try {
         let finalPath = filePath;
         const window = BrowserWindow.fromWebContents(event.sender);
-        
+
         if (!window) {
           throw new Error('Window not found');
         }
@@ -80,8 +80,8 @@ export class BicepFileManager {
             title: 'Save Bicep File',
             filters: [
               { name: 'Bicep Files', extensions: ['bicep'] },
-              { name: 'All Files', extensions: ['*'] }
-            ]
+              { name: 'All Files', extensions: ['*'] },
+            ],
           });
 
           if (result.canceled || !result.filePath) {
@@ -93,10 +93,10 @@ export class BicepFileManager {
 
         fs.writeFileSync(finalPath, content, 'utf8');
         this.addRecentFile(finalPath);
-        
+
         return {
           path: finalPath,
-          success: true
+          success: true,
         };
       } catch (error) {
         console.error('Error saving Bicep file:', error);
@@ -122,35 +122,35 @@ export class BicepFileManager {
         if (!fs.existsSync(tempDir)) {
           fs.mkdirSync(tempDir, { recursive: true });
         }
-        
+
         const tempFile = path.join(tempDir, `temp_${Date.now()}.bicep`);
         fs.writeFileSync(tempFile, content, 'utf8');
-        
+
         try {
           // Run Bicep validation
-          const { stdout, stderr } = await execAsync(`az bicep build --file ${tempFile}`);
-          
+          const { stdout } = await execAsync(`az bicep build --file ${tempFile}`);
+
           // Clean up
           fs.unlinkSync(tempFile);
-          
+
           return {
             valid: true,
-            output: stdout
+            output: stdout,
           };
         } catch (error: any) {
           // Clean up
           fs.unlinkSync(tempFile);
-          
+
           return {
             valid: false,
-            error: error.stderr || error.message
+            error: error.stderr || error.message,
           };
         }
       } catch (error: any) {
         console.error('Error validating Bicep file:', error);
         return {
           valid: false,
-          error: error.message
+          error: error.message,
         };
       }
     });
@@ -162,7 +162,7 @@ export class BicepFileManager {
   private loadRecentFiles(): void {
     try {
       const recentFilesPath = path.join(this.configPath, 'recent_files.json');
-      
+
       if (fs.existsSync(recentFilesPath)) {
         const data = fs.readFileSync(recentFilesPath, 'utf8');
         this.recentFiles = JSON.parse(data);
@@ -192,15 +192,15 @@ export class BicepFileManager {
   private addRecentFile(filePath: string): void {
     // Remove if already exists
     this.recentFiles = this.recentFiles.filter(file => file !== filePath);
-    
+
     // Add to beginning
     this.recentFiles.unshift(filePath);
-    
+
     // Limit to max recent files
     if (this.recentFiles.length > this.maxRecentFiles) {
       this.recentFiles = this.recentFiles.slice(0, this.maxRecentFiles);
     }
-    
+
     this.saveRecentFiles();
   }
 }

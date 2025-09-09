@@ -25,7 +25,28 @@ async function runTest(testFile) {
     
     const testPath = path.join(__dirname, testFile);
     const electron = process.platform === 'win32' ? 'electron.cmd' : 'electron';
-    const child = spawn(electron, [testPath], { stdio: 'inherit' });
+    
+    // Add flags for headless operation and CI environments
+    const electronArgs = [
+      testPath,
+      '--no-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor'
+    ];
+    
+    // Use xvfb-run on Linux for virtual display
+    let command, args;
+    if (process.platform === 'linux') {
+      command = 'xvfb-run';
+      args = ['-a', '--server-args=-screen 0 1024x768x24', electron, ...electronArgs];
+    } else {
+      command = electron;
+      args = electronArgs;
+    }
+    
+    const child = spawn(command, args, { stdio: 'inherit' });
     
     child.on('close', (code) => {
       const passed = code === 0;

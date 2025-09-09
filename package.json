@@ -16,7 +16,16 @@
     "package": "electron-builder build --mac --win --linux",
     "package:win": "electron-builder build --win",
     "package:mac": "electron-builder build --mac",
-    "package:linux": "electron-builder build --linux"
+    "package:linux": "electron-builder build --linux",
+    "prepare-package": "node scripts/prepare-package.js",
+    "postinstall": "electron-builder install-app-deps",
+    "lint": "tsc --noEmit && eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
+    "clean": "rm -rf dist",
+    "audit": "npm audit --audit-level=moderate",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "bicep",
@@ -27,6 +36,25 @@
   ],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "blockly": "^10.0.0",
+    "simple-git": "^3.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "css-loader": "^6.7.3",
+    "electron": "^23.1.0",
+    "electron-builder": "^23.6.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.5",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  },
   "build": {
     "appId": "com.bicep.blockly.editor",
     "productName": "Bicep Blockly Editor",

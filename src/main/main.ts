@@ -2,9 +2,6 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as fs from 'fs';
-import { GitModuleAnalyzer } from './git-module-analyzer';
-import { FeatureFlagManager } from './feature-flag-manager';
-import { BicepFileManager } from './bicep-file-manager';
 
 // Keep a global reference of the window object to avoid garbage collection
 let mainWindow: BrowserWindow | null = null;
@@ -23,11 +20,6 @@ if (!fs.existsSync(cachePath)) {
   fs.mkdirSync(cachePath, { recursive: true });
 }
 
-// Initialize managers
-const gitModuleAnalyzer = new GitModuleAnalyzer(cachePath);
-const featureFlagManager = new FeatureFlagManager(appDataPath);
-const bicepFileManager = new BicepFileManager(appDataPath);
-
 function createWindow() {
   // Create the browser window
   mainWindow = new BrowserWindow({
@@ -36,8 +28,8 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      preload: path.join(__dirname, 'preload.js')
-    }
+      preload: path.join(__dirname, 'preload.js'),
+    },
   });
 
   // Load the index.html file
@@ -45,7 +37,7 @@ function createWindow() {
     url.format({
       pathname: path.join(__dirname, '../index.html'),
       protocol: 'file:',
-      slashes: true
+      slashes: true,
     })
   );
 
@@ -87,6 +79,6 @@ ipcMain.handle('app-version', () => {
 ipcMain.handle('app-get-paths', () => {
   return {
     appData: appDataPath,
-    cache: cachePath
+    cache: cachePath,
   };
 });
