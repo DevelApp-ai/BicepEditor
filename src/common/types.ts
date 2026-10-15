@@ -78,7 +78,7 @@ export interface ModuleMetadata {
 export interface FeatureFlag {
   name: string;
   type: 'boolean' | 'string' | 'number' | 'object';
-  value: any;
+  value: unknown;
   description?: string;
 }
 
@@ -96,7 +96,7 @@ export interface EnvironmentConfig {
 export interface BicepModuleBlockDefinition {
   type: string;
   message0: string;
-  args0: any[];
+  args0: unknown[];
   output?: string;
   outputConnections?: {
     name: string;

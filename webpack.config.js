@@ -38,7 +38,10 @@ module.exports = [
   // Renderer process webpack configuration
   {
     mode: 'development',
-    entry: './src/renderer/renderer.ts',
+    entry: {
+      renderer: './src/renderer/renderer.ts',
+      preload: './src/renderer/preload.ts',
+    },
     target: 'electron-renderer',
     devtool: 'source-map',
     module: {
@@ -65,7 +68,7 @@ module.exports = [
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
-      filename: 'renderer.js'
+      filename: '[name].js'
     },
     resolve: {
       extensions: ['.ts', '.js'],

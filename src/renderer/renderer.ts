@@ -1,25 +1,41 @@
 import * as Blockly from 'blockly';
+import { BrowserServices } from '../common/browser-services';
+import { ElectronServices } from '../common/electron-services';
+import { AppError, PlatformServices, ProjectRecord } from '../common/platform';
 
-// Declare the API interface for TypeScript
-declare global {
-  interface Window {
-    api: {
-      getAppVersion: () => Promise<string>;
-      addRepository: (_repoUrl: string, _branch: string, _auth: any) => Promise<any>;
-      refreshRepository: (_repoId: string) => Promise<any>;
-      listRepositories: () => Promise<any[]>;
-      analyzeModule: (_modulePath: string) => Promise<any>;
-      listModules: (_repoId: string) => Promise<any[]>;
-      saveFeatureFlags: (_environment: string, _flags: any) => Promise<void>;
-      loadFeatureFlags: (_environment: string) => Promise<any>;
-      saveBicepFile: (
-        _filePath: string,
-        _content: string
-      ) => Promise<{ path: string; success: boolean } | null>;
-      openBicepFile: () => Promise<{ path: string; content: string } | null>;
-      on: (_channel: string, _callback: Function) => void;
-      off: (_channel: string, _callback: Function) => void;
-    };
+/**
+ * Resolve the platform service layer at runtime:
+ * - Browser (GitHub Pages): IndexedDB storage + GitHub API Git transport.
+ * - Electron: whitelisted IPC bridge to the main process.
+ */
+async function resolveServices(): Promise<PlatformServices> {
+  const api = (globalThis as { api?: unknown }).api;
+  if (api) {
+    return new ElectronServices();
+  }
+  const browserServices = new BrowserServices();
+  await browserServices.initialize();
+  return browserServices;
+}
+
+const servicesPromise: Promise<PlatformServices> = resolveServices();
+
+async function withServices<T>(operation: (services: PlatformServices) => Promise<T>): Promise<T> {
+  const services = await servicesPromise;
+  try {
+    return await operation(services);
+  } catch (error) {
+    const appError =
+      error instanceof AppError
+        ? error
+        : new AppError(
+            'ERR_UNKNOWN',
+            error instanceof Error ? error.message : String(error),
+            services.platform,
+            error
+          );
+    console.error(`[${appError.code}] ${appError.message}`);
+    throw appError;
   }
 }
 
@@ -32,7 +48,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize Blockly workspace
 function initializeBlockly() {
-  // Define the toolbox
   const toolbox = {
     kind: 'categoryToolbox',
     contents: [
@@ -40,30 +55,23 @@ function initializeBlockly() {
         kind: 'category',
         name: 'Core Resources',
         colour: '#5C81A6',
-        contents: [
-          // Will be populated with core Bicep blocks
-        ],
+        contents: [],
       },
       {
         kind: 'category',
         name: 'Modules',
         colour: '#5CA65C',
-        contents: [
-          // Will be populated with module blocks from repositories
-        ],
+        contents: [],
       },
       {
         kind: 'category',
         name: 'Feature Flags',
         colour: '#A65C81',
-        contents: [
-          // Will be populated with feature flag blocks
-        ],
+        contents: [],
       },
     ],
   };
 
-  // Inject Blockly into the workspace div
   const workspace = Blockly.inject('blocklyDiv', {
     toolbox: toolbox,
     grid: {
@@ -83,7 +91,6 @@ function initializeBlockly() {
     trashcan: true,
   });
 
-  // Add change listener to update code preview
   workspace.addChangeListener(() => {
     updateCodePreview();
   });
@@ -91,10 +98,8 @@ function initializeBlockly() {
 
 // Update the code preview panel with generated Bicep code
 function updateCodePreview() {
-  // This will be replaced with actual Bicep code generation
   const code =
     "param storageAccountName string\nparam location string = resourceGroup().location\n\nresource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {\n  name: storageAccountName\n  location: location\n  sku: {\n    name: 'Standard_LRS'\n  }\n  kind: 'StorageV2'\n}";
-
   const codePreview = document.getElementById('generatedCode');
   if (codePreview) {
     codePreview.textContent = code;
@@ -103,54 +108,57 @@ function updateCodePreview() {
 
 // Set up event listeners for UI elements
 function setupEventListeners() {
-  // New file button
   const newFileButton = document.getElementById('newFile');
   if (newFileButton) {
     newFileButton.addEventListener('click', () => {
-      // Clear workspace and start new file
-      console.log('New file');
+      const workspace = Blockly.getMainWorkspace();
+      workspace.clear();
     });
   }
 
-  // Open file button
   const openFileButton = document.getElementById('openFile');
   if (openFileButton) {
-    openFileButton.addEventListener('click', async () => {
-      try {
-        // Open file dialog will be implemented here
-        console.log('Open file');
-      } catch (error) {
-        console.error('Error opening file:', error);
-      }
+    openFileButton.addEventListener('click', () => {
+      void withServices(async services => {
+        const result = await services.openBicepFile();
+        if (result) {
+          const codePreview = document.getElementById('generatedCode');
+          if (codePreview) {
+            codePreview.textContent = result.content;
+          }
+        }
+      });
     });
   }
 
-  // Save file button
   const saveFileButton = document.getElementById('saveFile');
   if (saveFileButton) {
-    saveFileButton.addEventListener('click', async () => {
-      try {
-        // Save file dialog will be implemented here
-        console.log('Save file');
-      } catch (error) {
-        console.error('Error saving file:', error);
-      }
+    saveFileButton.addEventListener('click', () => {
+      void withServices(async services => {
+        const codePreview = document.getElementById('generatedCode');
+        const content = codePreview?.textContent ?? '';
+        const project: ProjectRecord = {
+          id: `project-${Date.now()}`,
+          name: 'main',
+          content,
+          updatedAt: Date.now(),
+        };
+        await services.saveProject(project);
+        await services.saveBicepFile('main.bicep', content);
+      });
     });
   }
 
-  // Environment selector
-  const environmentSelector = document.getElementById('environmentSelector') as HTMLSelectElement;
+  const environmentSelector = document.getElementById(
+    'environmentSelector'
+  ) as HTMLSelectElement | null;
   if (environmentSelector) {
-    environmentSelector.addEventListener('change', async () => {
+    environmentSelector.addEventListener('change', () => {
       const environment = environmentSelector.value;
-      try {
-        // Load feature flags for selected environment
-        const flags = await window.api.loadFeatureFlags(environment);
+      void withServices(async services => {
+        const flags = await services.loadFeatureFlags(environment);
         console.log(`Loaded feature flags for ${environment}:`, flags);
-        // Update UI based on selected environment
-      } catch (error) {
-        console.error(`Error loading feature flags for ${environment}:`, error);
-      }
+      });
     });
   }
 }
@@ -162,11 +170,8 @@ function setupTabSwitching() {
 
   tabButtons.forEach(button => {
     button.addEventListener('click', () => {
-      // Remove active class from all buttons and contents
       tabButtons.forEach(btn => btn.classList.remove('active'));
       tabContents.forEach(content => content.classList.remove('active'));
-
-      // Add active class to clicked button and corresponding content
       button.classList.add('active');
       const tabId = button.getAttribute('data-tab');
       if (tabId) {
@@ -178,16 +183,3 @@ function setupTabSwitching() {
     });
   });
 }
-
-// Initialize application version
-async function initAppVersion() {
-  try {
-    const version = await window.api.getAppVersion();
-    console.log(`Bicep Blockly Editor v${version}`);
-  } catch (error) {
-    console.error('Error getting app version:', error);
-  }
-}
-
-// Call initialization functions
-initAppVersion();

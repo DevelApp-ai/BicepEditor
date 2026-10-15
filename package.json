@@ -9,6 +9,7 @@
     "watch": "webpack --config webpack.config.js --watch",
     "dev": "npm run build && npm run start",
     "test": "node tests/run-all-tests.js",
+    "test:web": "tsc -p tsconfig.test.json && node --test tests/unit/*.test.mjs",
     "test:core": "electron tests/core-functionality.test.js",
     "test:modules": "electron tests/module-analysis.test.js",
     "test:flags": "electron tests/feature-flags.test.js",
@@ -19,12 +20,13 @@
     "package:linux": "electron-builder build --linux",
     "prepare-package": "node scripts/prepare-package.js",
     "postinstall": "electron-builder install-app-deps",
-    "lint": "tsc --noEmit && eslint src/**/*.ts",
+    "lint": "tsc --noEmit && eslint src/**/*.ts --max-warnings 0",
+    "build:web": "webpack --config webpack.web.config.js",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
     "clean": "rm -rf dist",
-    "audit": "npm audit --audit-level=moderate",
+    "audit": "npm audit --audit-level=high",
     "type-check": "tsc --noEmit"
   },
   "keywords": [

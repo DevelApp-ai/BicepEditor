@@ -38,9 +38,15 @@ export class FeatureFlagBlockManager {
    */
   public async loadFeatureFlags(): Promise<void> {
     try {
-      this.featureFlags = await window.api.loadFeatureFlags(this.currentEnvironment);
+      const api = (
+        window as unknown as { api?: { loadFeatureFlags: (e: string) => Promise<FeatureFlag[]> } }
+      ).api;
+      if (!api) {
+        this.featureFlags = [];
+        return;
+      }
+      this.featureFlags = (await api.loadFeatureFlags(this.currentEnvironment)) ?? [];
     } catch (error) {
-      console.error('Error loading feature flags:', error);
       this.featureFlags = [];
     }
   }
@@ -54,7 +60,7 @@ export class FeatureFlagBlockManager {
       kind: 'category',
       name: 'Feature Flags',
       colour: '#A65C81',
-      contents: [] as any[],
+      contents: [] as { kind: string; type?: string }[],
     };
 
     // Add blocks for each feature flag
@@ -71,10 +77,11 @@ export class FeatureFlagBlockManager {
     // Add category to toolbox
     const toolbox = this.workspace.getToolbox();
     if (toolbox) {
-      // @ts-ignore - toolboxDef is not in the type definitions
-      const toolboxDef = toolbox.getToolboxDef();
+      const toolboxDef = (
+        toolbox as unknown as { getToolboxDef: () => { contents: unknown[] } }
+      ).getToolboxDef();
       toolboxDef.contents.push(featureFlagCategory);
-      toolbox.render(toolboxDef);
+      toolbox.render(toolboxDef as never);
     }
   }
 
@@ -83,8 +90,8 @@ export class FeatureFlagBlockManager {
    * @param flag Feature flag
    * @returns Block definition
    */
-  private createFeatureFlagBlockDefinition(flag: FeatureFlag): any {
-    const blockDef: any = {
+  private createFeatureFlagBlockDefinition(flag: FeatureFlag): Record<string, unknown> {
+    const blockDef: Record<string, unknown> = {
       type: `feature_flag_${flag.name}`,
       message0: `Feature Flag: ${flag.name}`,
       output: this.getOutputType(flag.type),
@@ -120,12 +127,13 @@ export class FeatureFlagBlockManager {
     // Remove existing feature flag blocks
     const toolbox = this.workspace.getToolbox();
     if (toolbox) {
-      // @ts-ignore - toolboxDef is not in the type definitions
-      const toolboxDef = toolbox.getToolboxDef();
+      const toolboxDef = (
+        toolbox as unknown as { getToolboxDef: () => { contents: { name?: string }[] } }
+      ).getToolboxDef();
       toolboxDef.contents = toolboxDef.contents.filter(
-        (category: any) => category.name !== 'Feature Flags'
+        (category: { name?: string }) => category.name !== 'Feature Flags'
       );
-      toolbox.render(toolboxDef);
+      toolbox.render(toolboxDef as never);
     }
 
     // Create new feature flag blocks
@@ -136,24 +144,28 @@ export class FeatureFlagBlockManager {
    * Define code generators for feature flag blocks
    * @param generator Blockly generator
    */
-  public defineFeatureFlagGenerators(generator: any): void {
+  public defineFeatureFlagGenerators(generator: {
+    forBlock: Record<string, () => [string, number]>;
+    ORDER_ATOMIC: number;
+  }): void {
     this.featureFlags.forEach(flag => {
       generator.forBlock[`feature_flag_${flag.name}`] = function () {
         // Return the feature flag value based on the current environment
         let value: string;
 
+        const flagValue = flag.value as boolean | number | string | object;
         switch (flag.type) {
           case 'boolean':
-            value = flag.value ? 'true' : 'false';
+            value = flagValue ? 'true' : 'false';
             break;
           case 'number':
-            value = flag.value.toString();
+            value = String(flagValue);
             break;
           case 'string':
-            value = `'${flag.value}'`;
+            value = `'${String(flagValue)}'`;
             break;
           default:
-            value = `'${JSON.stringify(flag.value)}'`;
+            value = `'${JSON.stringify(flagValue)}'`;
         }
 
         return [value, generator.ORDER_ATOMIC];

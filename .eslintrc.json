@@ -16,10 +16,15 @@
     "@typescript-eslint"
   ],
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-non-null-assertion": "warn",
-    "no-console": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "no-console": "error",
     "prefer-const": "error",
     "no-var": "error",
     "eqeqeq": "error",
@@ -31,5 +36,24 @@
     "release/**/*",
     "*.config.js",
     "tests/**/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/main/**/*.ts",
+        "src/common/feature-flag-manager.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    },
+    {
+      "files": [
+        "src/renderer/**/*.ts"
+      ],
+      "rules": {
+        "no-console": "off"
+      }
+    }
   ]
 }

@@ -115,7 +115,7 @@ export class FeatureFlagManager {
    */
   private setupIpcHandlers(): void {
     // Load feature flags for an environment
-    ipcMain.handle('feature-flags-load', async (event, environment: string) => {
+    ipcMain.handle('feature-flags-load', async (_event, environment: string) => {
       try {
         const env = this.environments.get(environment);
         if (!env) {
@@ -131,7 +131,7 @@ export class FeatureFlagManager {
     // Save feature flags for an environment
     ipcMain.handle(
       'feature-flags-save',
-      async (event, environment: string, flags: FeatureFlag[]) => {
+      async (_event, environment: string, flags: FeatureFlag[]) => {
         try {
           const env = this.environments.get(environment);
           if (!env) {
@@ -164,7 +164,7 @@ export class FeatureFlagManager {
     });
 
     // Create a new environment
-    ipcMain.handle('feature-flags-create-environment', async (event, environment: string) => {
+    ipcMain.handle('feature-flags-create-environment', async (_event, environment: string) => {
       try {
         if (this.environments.has(environment)) {
           throw new Error(`Environment ${environment} already exists`);
@@ -185,7 +185,7 @@ export class FeatureFlagManager {
     });
 
     // Delete an environment
-    ipcMain.handle('feature-flags-delete-environment', async (event, environment: string) => {
+    ipcMain.handle('feature-flags-delete-environment', async (_event, environment: string) => {
       try {
         if (!this.environments.has(environment)) {
           throw new Error(`Environment ${environment} not found`);
@@ -225,7 +225,7 @@ export class FeatureFlagManager {
    * @param flagName Feature flag name
    * @returns Feature flag value or undefined
    */
-  public getFeatureFlagValue(environment: string, flagName: string): any {
+  public getFeatureFlagValue(environment: string, flagName: string): unknown {
     const env = this.environments.get(environment);
     if (!env) {
       return undefined;

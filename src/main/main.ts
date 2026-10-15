@@ -26,8 +26,9 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
       preload: path.join(__dirname, 'preload.js'),
     },
   });
@@ -81,4 +82,37 @@ ipcMain.handle('app-get-paths', () => {
     appData: appDataPath,
     cache: cachePath,
   };
+});
+
+// IPC handlers for project persistence (mirrors the browser IndexedDB store)
+const projectsPath = path.join(appDataPath, 'projects.json');
+
+function loadProjects(): Record<string, unknown> {
+  try {
+    if (fs.existsSync(projectsPath)) {
+      return JSON.parse(fs.readFileSync(projectsPath, 'utf8')) as Record<string, unknown>;
+    }
+  } catch (error) {
+    console.error('Error loading projects:', error);
+  }
+  return {};
+}
+
+function persistProjects(projects: Record<string, unknown>): void {
+  fs.writeFileSync(projectsPath, JSON.stringify(projects), 'utf8');
+}
+
+ipcMain.handle('project-save', (_event, project: { id: string }) => {
+  const projects = loadProjects();
+  projects[project.id] = project;
+  persistProjects(projects);
+});
+
+ipcMain.handle('project-load', (_event, id: string) => {
+  const projects = loadProjects();
+  return projects[id] ?? null;
+});
+
+ipcMain.handle('project-list', () => {
+  return Object.values(loadProjects());
 });

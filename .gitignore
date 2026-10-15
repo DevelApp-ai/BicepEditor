@@ -6,6 +6,10 @@ yarn-error.log*
 
 # Build outputs
 dist/
+web/renderer.js
+web/*.map
+web/*.LICENSE.txt
+dist-test/
 release/
 build/
 out/
