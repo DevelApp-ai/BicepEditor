@@ -15,8 +15,16 @@ const MIME = {
 const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(new URL(req.url ?? '/', `http://127.0.0.1:${PORT}`).pathname);
   const relative = urlPath.replace(/^\/BicepEditor\/?/, '');
-  const filePath = path.join(ROOT, relative || 'index.html');
-  if (!filePath.startsWith(ROOT) || !fs.existsSync(filePath)) {
+  let filePath = path.join(ROOT, relative || 'index.html');
+  if (!filePath.startsWith(ROOT)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('forbidden');
+    return;
+  }
+  if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+    filePath = path.join(ROOT, 'index.html');
+  }
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('not found');
     return;
