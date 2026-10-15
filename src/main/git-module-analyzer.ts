@@ -1,7 +1,7 @@
 import { ipcMain } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import {
   ModuleMetadata,
   ModuleOutput,
@@ -197,7 +197,7 @@ export class GitModuleAnalyzer {
     fs.mkdirSync(repoPath, { recursive: true });
 
     // Clone repository
-    const git = simpleGit.default();
+    const git = simpleGit();
 
     // Handle authentication
     if (repo.auth.type === 'pat') {
@@ -211,7 +211,7 @@ export class GitModuleAnalyzer {
     }
 
     // Checkout specific branch
-    const localGit = simpleGit.default(repoPath);
+    const localGit = simpleGit(repoPath);
     await localGit.checkout(repo.branch);
 
     return repoPath;
@@ -231,7 +231,7 @@ export class GitModuleAnalyzer {
     }
 
     // Pull latest changes
-    const git = simpleGit.default(repoPath);
+    const git = simpleGit(repoPath);
     await git.pull('origin', repo.branch);
 
     return repoPath;

@@ -46,7 +46,7 @@ export class FeatureFlagBlockManager {
         return;
       }
       this.featureFlags = (await api.loadFeatureFlags(this.currentEnvironment)) ?? [];
-    } catch (error) {
+    } catch {
       this.featureFlags = [];
     }
   }
