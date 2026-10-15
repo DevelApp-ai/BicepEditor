@@ -1,8 +1,14 @@
 import { ipcMain } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as simpleGit from 'simple-git';
-import { RepositoryConfig, ModuleMetadata } from '../common/types';
+import { simpleGit } from 'simple-git';
+import {
+  ModuleMetadata,
+  ModuleOutput,
+  ModuleParameter,
+  ModuleResource,
+  RepositoryConfig,
+} from '../common/types';
 
 /**
  * GitModuleAnalyzer class for analyzing Bicep modules from git repositories
@@ -30,7 +36,7 @@ export class GitModuleAnalyzer {
     // Add repository
     ipcMain.handle(
       'git-add-repository',
-      async (event, repoUrl: string, branch: string, auth: any) => {
+      async (_event, repoUrl: string, branch: string, auth: RepositoryConfig['auth']) => {
         try {
           const repoId = this.generateRepoId(repoUrl);
           const repoConfig: RepositoryConfig = {
@@ -60,7 +66,7 @@ export class GitModuleAnalyzer {
     );
 
     // Refresh repository
-    ipcMain.handle('git-refresh-repository', async (event, repoId: string) => {
+    ipcMain.handle('git-refresh-repository', async (_event, repoId: string) => {
       try {
         const repoConfig = this.repositories.get(repoId);
         if (!repoConfig) {
@@ -101,7 +107,7 @@ export class GitModuleAnalyzer {
     });
 
     // List modules
-    ipcMain.handle('module-list', async (event, repoId: string) => {
+    ipcMain.handle('module-list', async (_event, repoId: string) => {
       try {
         const modules = [];
         for (const [id, module] of this.moduleRegistry.entries()) {
@@ -123,7 +129,7 @@ export class GitModuleAnalyzer {
     });
 
     // Analyze module
-    ipcMain.handle('module-analyze', async (event, modulePath: string) => {
+    ipcMain.handle('module-analyze', async (_event, modulePath: string) => {
       try {
         const moduleId = this.generateModuleId(modulePath);
         const module = this.moduleRegistry.get(moduleId);
@@ -191,7 +197,7 @@ export class GitModuleAnalyzer {
     fs.mkdirSync(repoPath, { recursive: true });
 
     // Clone repository
-    const git = simpleGit.default();
+    const git = simpleGit();
 
     // Handle authentication
     if (repo.auth.type === 'pat') {
@@ -205,7 +211,7 @@ export class GitModuleAnalyzer {
     }
 
     // Checkout specific branch
-    const localGit = simpleGit.default(repoPath);
+    const localGit = simpleGit(repoPath);
     await localGit.checkout(repo.branch);
 
     return repoPath;
@@ -225,7 +231,7 @@ export class GitModuleAnalyzer {
     }
 
     // Pull latest changes
-    const git = simpleGit.default(repoPath);
+    const git = simpleGit(repoPath);
     await git.pull('origin', repo.branch);
 
     return repoPath;
@@ -359,8 +365,8 @@ export class GitModuleAnalyzer {
    * @param content Module content
    * @returns Array of parameters
    */
-  private extractParameters(content: string): any[] {
-    const parameters: any[] = [];
+  private extractParameters(content: string): ModuleParameter[] {
+    const parameters: ModuleParameter[] = [];
     const paramRegex = /param\s+(\w+)\s+(\w+)(?:\s*=\s*(.+))?/g;
 
     let match;
@@ -383,8 +389,8 @@ export class GitModuleAnalyzer {
    * @param content Module content
    * @returns Array of outputs
    */
-  private extractOutputs(content: string): any[] {
-    const outputs: any[] = [];
+  private extractOutputs(content: string): ModuleOutput[] {
+    const outputs: ModuleOutput[] = [];
     const outputRegex = /output\s+(\w+)\s+(\w+)\s*=\s*(.+)/g;
 
     let match;
@@ -406,8 +412,8 @@ export class GitModuleAnalyzer {
    * @param content Module content
    * @returns Array of resources
    */
-  private extractResources(content: string): any[] {
-    const resources: any[] = [];
+  private extractResources(content: string): ModuleResource[] {
+    const resources: ModuleResource[] = [];
     const resourceRegex = /resource\s+(\w+)\s+'([^']+)@([^']+)'/g;
 
     let match;

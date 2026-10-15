@@ -42,9 +42,11 @@ async function runTests() {
     height: 800,
     show: false,
     webPreferences: {
-      nodeIntegration: true,
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
       contextIsolation: false,
-      preload: path.join(__dirname, '../src/renderer/preload.js')
+      preload: path.join(__dirname, '../dist/preload.js')
     }
   });
   

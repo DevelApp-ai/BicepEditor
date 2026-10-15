@@ -1,4 +1,5 @@
 import * as Blockly from 'blockly';
+import { ModuleMetadata, ModuleOutput, ModuleParameter } from './types';
 import { BicepModuleBlockDefinition } from '../common/types';
 
 /**
@@ -191,9 +192,11 @@ export class BicepBlockFactory {
   /**
    * Create a block definition for a Bicep module
    */
-  public static createModuleBlockDefinition(moduleMetadata: any): BicepModuleBlockDefinition {
+  public static createModuleBlockDefinition(
+    moduleMetadata: ModuleMetadata
+  ): BicepModuleBlockDefinition {
     // Create the basic block structure
-    const blockDef: BicepModuleBlockDefinition = {
+    const blockDef: BicepModuleBlockDefinition & Record<string, unknown> = {
       type: `bicep_module_${moduleMetadata.moduleName}`,
       message0: `Module: ${moduleMetadata.moduleName} %1`,
       args0: [
@@ -222,7 +225,7 @@ export class BicepBlockFactory {
     messageIndex++;
 
     // Add parameters
-    moduleMetadata.parameters.forEach((param: any) => {
+    moduleMetadata.parameters.forEach((param: ModuleParameter) => {
       blockDef[`message${messageIndex}`] = `${param.name}: %1`;
 
       // Different input types based on parameter type
@@ -250,8 +253,8 @@ export class BicepBlockFactory {
     });
 
     // Add outputs as connections
-    moduleMetadata.outputs.forEach((output: any) => {
-      blockDef.outputConnections!.push({
+    moduleMetadata.outputs.forEach((output: ModuleOutput) => {
+      (blockDef.outputConnections as { name: string; type: string }[]).push({
         name: `OUTPUT_${output.name}`,
         type: output.type.charAt(0).toUpperCase() + output.type.slice(1),
       });

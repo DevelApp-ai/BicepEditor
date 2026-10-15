@@ -115,7 +115,7 @@ export class BicepFileManager {
     });
 
     // Validate Bicep file
-    ipcMain.handle('file-validate-bicep', async (event, content: string) => {
+    ipcMain.handle('file-validate-bicep', async (_event, content: string) => {
       try {
         // Create temporary file
         const tempDir = path.join(this.configPath, 'temp');
@@ -137,20 +137,20 @@ export class BicepFileManager {
             valid: true,
             output: stdout,
           };
-        } catch (error: any) {
+        } catch (error: unknown) {
           // Clean up
           fs.unlinkSync(tempFile);
 
           return {
             valid: false,
-            error: error.stderr || error.message,
+            error: error instanceof Error ? error.message : String(error),
           };
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error validating Bicep file:', error);
         return {
           valid: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
         };
       }
     });

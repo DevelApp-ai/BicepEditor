@@ -24,7 +24,9 @@ async function runTest(testFile) {
     console.log(`\n=== Running ${testFile} ===\n`);
     
     const testPath = path.join(__dirname, testFile);
-    const electron = process.platform === 'win32' ? 'electron.cmd' : 'electron';
+    // require('electron') from plain Node resolves to the Electron binary path,
+    // which is cross-platform (dist/electron.exe on Windows, dist/electron elsewhere).
+    const electronBinary = require('electron');
     
     // Add flags for headless operation and CI environments
     const electronArgs = [
@@ -40,9 +42,9 @@ async function runTest(testFile) {
     let command, args;
     if (process.platform === 'linux') {
       command = 'xvfb-run';
-      args = ['-a', '--server-args=-screen 0 1024x768x24', electron, ...electronArgs];
+      args = ['-a', '--server-args=-screen 0 1024x768x24', electronBinary, ...electronArgs];
     } else {
-      command = electron;
+      command = electronBinary;
       args = electronArgs;
     }
     

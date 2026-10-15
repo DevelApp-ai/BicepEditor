@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
 
 jobs:
   code-quality:
@@ -50,9 +50,8 @@ jobs:
     - name: ESLint check
       run: npm run lint
     
-    - name: Security audit
+    - name: Security audit (fail on high/critical)
       run: npm run audit
-      continue-on-error: true
 
   test:
     name: Cross-Platform Testing
@@ -61,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['18', '20']
+        node-version: ['22']
         include:
           - os: ubuntu-latest
             platform: linux
@@ -121,7 +120,7 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 &
           sleep 3
         fi
-        npm test || echo "Tests failed in CI environment - this is expected for Electron GUI tests"
+        npm test
       shell: bash
       env:
         CI: true

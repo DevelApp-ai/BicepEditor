@@ -9,6 +9,7 @@
     "watch": "webpack --config webpack.config.js --watch",
     "dev": "npm run build && npm run start",
     "test": "node tests/run-all-tests.js",
+    "test:web": "tsc -p tsconfig.test.json && node --test tests/unit/*.test.mjs",
     "test:core": "electron tests/core-functionality.test.js",
     "test:modules": "electron tests/module-analysis.test.js",
     "test:flags": "electron tests/feature-flags.test.js",
@@ -19,12 +20,13 @@
     "package:linux": "electron-builder build --linux",
     "prepare-package": "node scripts/prepare-package.js",
     "postinstall": "electron-builder install-app-deps",
-    "lint": "tsc --noEmit && eslint src/**/*.ts",
+    "lint": "tsc --noEmit && eslint src/**/*.ts --max-warnings 0",
+    "build:web": "webpack --config webpack.web.config.js",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write \"src/**/*.{ts,js,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
     "clean": "rm -rf dist",
-    "audit": "npm audit --audit-level=moderate",
+    "audit": "npm audit --audit-level=high",
     "type-check": "tsc --noEmit"
   },
   "keywords": [
@@ -38,20 +40,20 @@
   "license": "MIT",
   "dependencies": {
     "blockly": "^10.0.0",
-    "simple-git": "^3.16.0"
+    "simple-git": "^4.0.2"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
+    "@types/node": "^22.20.5",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
+    "@typescript-eslint/parser": "^8.71.2",
     "css-loader": "^6.7.3",
-    "electron": "^23.1.0",
-    "electron-builder": "^23.6.0",
-    "eslint": "^8.45.0",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3",
+    "eslint": "^9.39.5",
     "prettier": "^3.0.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
-    "typescript": "^4.9.5",
+    "typescript": "^5.9.3",
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1"
   },
@@ -112,5 +114,8 @@
         }
       ]
     }
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }
