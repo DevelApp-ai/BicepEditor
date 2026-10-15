@@ -74,6 +74,9 @@ function initializeBlockly() {
 
   const workspace = Blockly.inject('blocklyDiv', {
     toolbox: toolbox,
+    // Serve Blockly media (sprites/sounds) from the app origin; the default
+    // CDN host would be blocked by the strict CSP.
+    media: new URL('media/', document.baseURI).toString(),
     grid: {
       spacing: 20,
       length: 3,

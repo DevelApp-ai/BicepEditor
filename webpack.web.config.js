@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 // Public path for GitHub project pages, e.g. /BicepEditor/ for
 // https://<owner>.github.io/BicepEditor/. Override with --env PUBLIC_PATH.
@@ -26,7 +27,8 @@ module.exports = (env = {}) => {
       path: path.resolve(__dirname, 'web'),
       filename: 'renderer.js',
       publicPath: publicPath,
-      clean: true,
+      // web/index.html is source-controlled; never wipe the output folder.
+      clean: false,
     },
     resolve: {
       extensions: ['.ts', '.js'],
@@ -35,6 +37,21 @@ module.exports = (env = {}) => {
         '@renderer': path.resolve(__dirname, 'src/renderer/'),
       },
     },
+    plugins: [
+      {
+        apply: compiler => {
+          compiler.hooks.afterEmit.tap('CopyStaticAssets', () => {
+            const webDir = path.resolve(__dirname, 'web');
+            fs.copyFileSync(path.resolve(__dirname, 'styles.css'), path.join(webDir, 'styles.css'));
+            // Blockly media must be served from the app origin (strict CSP
+            // blocks the default external CDN host).
+            fs.cpSync(path.resolve(__dirname, 'node_modules', 'blockly', 'media'), path.join(webDir, 'media'), {
+              recursive: true,
+            });
+          });
+        },
+      },
+    ],
     performance: {
       hints: 'error',
       // Blockly is a large dependency; enforce an explicit ceiling of 1 MiB

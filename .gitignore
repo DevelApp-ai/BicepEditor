@@ -61,4 +61,5 @@ coverage/
 *.tsbuildinfo
 
 # Electron dist folders
-app-builds/
+app-builds/test-results/
+web/media/

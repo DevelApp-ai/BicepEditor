@@ -133,7 +133,7 @@ export class BrowserServices implements PlatformServices {
   }
 
   async initialize(): Promise<void> {
-    await this.storage.open(['projects', 'featureFlags']);
+    await this.storage.open(['projects', 'featureFlags', 'repositories']);
     const saved = await this.storage.list<RepositoryConfig>('repositories');
     for (const repo of saved) {
       this.repositories.set(repo.id, repo);
@@ -142,6 +142,13 @@ export class BrowserServices implements PlatformServices {
 
   setSessionToken(token: string | null): void {
     this.transport.setSessionToken(token);
+  }
+
+  /**
+   * Test seam: replace the transport's fetch implementation.
+   */
+  setTransportFetchForTests(fetchImpl: typeof fetch): void {
+    (this.transport as unknown as { fetchImpl: typeof fetch }).fetchImpl = fetchImpl;
   }
 
   async addRepository(
@@ -170,6 +177,7 @@ export class BrowserServices implements PlatformServices {
     };
     this.repositories.set(id, config);
     this.modules.set(id, modules);
+    await this.storage.put('repositories', id, config);
     return { id, name: repo, modules: modules.length };
   }
 
