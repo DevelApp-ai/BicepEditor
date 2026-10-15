@@ -62,3 +62,4 @@ coverage/
 
 # Electron dist folders
 app-builds/test-results/
+web/media/

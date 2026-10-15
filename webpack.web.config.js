@@ -40,8 +40,14 @@ module.exports = (env = {}) => {
     plugins: [
       {
         apply: compiler => {
-          compiler.hooks.afterEmit.tap('CopyStyles', () => {
-            fs.copyFileSync(path.resolve(__dirname, 'styles.css'), path.resolve(__dirname, 'web', 'styles.css'));
+          compiler.hooks.afterEmit.tap('CopyStaticAssets', () => {
+            const webDir = path.resolve(__dirname, 'web');
+            fs.copyFileSync(path.resolve(__dirname, 'styles.css'), path.join(webDir, 'styles.css'));
+            // Blockly media must be served from the app origin (strict CSP
+            // blocks the default external CDN host).
+            fs.cpSync(path.resolve(__dirname, 'node_modules', 'blockly', 'media'), path.join(webDir, 'media'), {
+              recursive: true,
+            });
           });
         },
       },
