@@ -1,30 +1,24 @@
-import {
-  AppError,
-  Platform,
-  PlatformServices,
-  ProjectRecord,
-  RepositoryResult,
-} from "./platform";
-import { ModuleMetadata, RepositoryConfig } from "./types";
+import { AppError, Platform, PlatformServices, ProjectRecord, RepositoryResult } from './platform';
+import { ModuleMetadata, RepositoryConfig } from './types';
 
 /**
  * Electron implementation of PlatformServices. Bridges to the preload API
  * (window.api) which exposes whitelisted IPC channels.
  */
 export class ElectronServices implements PlatformServices {
-  readonly platform: Platform = "electron";
+  readonly platform: Platform = 'electron';
 
   get appVersion(): string {
-    return "electron";
+    return 'electron';
   }
 
   private api(): unknown {
     const candidate = (globalThis as { api?: unknown }).api;
     if (!candidate) {
       throw new AppError(
-        "ERR_NO_BRIDGE",
-        "Electron bridge (window.api) unavailable",
-        this.platform,
+        'ERR_NO_BRIDGE',
+        'Electron bridge (window.api) unavailable',
+        this.platform
       );
     }
     return candidate;
@@ -33,14 +27,10 @@ export class ElectronServices implements PlatformServices {
   async addRepository(
     repoUrl: string,
     branch: string,
-    auth: { type: "none" | "pat"; token?: string },
+    auth: { type: 'none' | 'pat'; token?: string }
   ): Promise<RepositoryResult> {
     const api = this.api() as {
-      addRepository: (
-        u: string,
-        b: string,
-        a: unknown,
-      ) => Promise<RepositoryResult>;
+      addRepository: (u: string, b: string, a: unknown) => Promise<RepositoryResult>;
     };
     return api.addRepository(repoUrl, branch, auth);
   }
@@ -101,13 +91,10 @@ export class ElectronServices implements PlatformServices {
 
   async saveBicepFile(
     fileName: string,
-    content: string,
+    content: string
   ): Promise<{ path: string; success: boolean } | null> {
     const api = this.api() as {
-      saveBicepFile: (
-        f: string,
-        c: string,
-      ) => Promise<{ path: string; success: boolean } | null>;
+      saveBicepFile: (f: string, c: string) => Promise<{ path: string; success: boolean } | null>;
     };
     return api.saveBicepFile(fileName, content);
   }

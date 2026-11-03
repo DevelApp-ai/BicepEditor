@@ -1,5 +1,5 @@
-import * as Blockly from "blockly";
-import { BicepCodeGenerationOptions } from "../common/types";
+import * as Blockly from 'blockly';
+import { BicepCodeGenerationOptions } from '../common/types';
 
 type BicepBlockLike = {
   getFieldValue: (n: string) => string;
@@ -39,10 +39,7 @@ export class BicepGenerator {
    * @param workspace Blockly workspace
    * @param options Code generation options
    */
-  constructor(
-    workspace: Blockly.WorkspaceSvg,
-    options: BicepCodeGenerationOptions,
-  ) {
+  constructor(workspace: Blockly.WorkspaceSvg, options: BicepCodeGenerationOptions) {
     this.workspace = workspace;
     this.options = options;
     this.initializeCodeGenerator();
@@ -56,7 +53,7 @@ export class BicepGenerator {
     const blocklyNs = Blockly as unknown as {
       CodeGenerator: new (name: string) => GeneratorLike;
     };
-    const bicepGenerator = new blocklyNs.CodeGenerator("Bicep");
+    const bicepGenerator = new blocklyNs.CodeGenerator('Bicep');
 
     // Define order of operations
     bicepGenerator.ORDER_ATOMIC = 0;
@@ -85,18 +82,17 @@ export class BicepGenerator {
    */
   private defineBlockGenerators(generator: GeneratorLike): void {
     // Storage Account block
-    generator.forBlock["bicep_storage_account"] = function (block: {
+    generator.forBlock['bicep_storage_account'] = function (block: {
       getFieldValue: (n: string) => string;
       inputList?: unknown[];
     }) {
-      const name = block.getFieldValue("NAME");
+      const name = block.getFieldValue('NAME');
       const storageName =
-        generator.valueToCode(block, "STORAGE_NAME", generator.ORDER_ATOMIC) ||
-        "'defaultStorage'";
+        generator.valueToCode(block, 'STORAGE_NAME', generator.ORDER_ATOMIC) || "'defaultStorage'";
       const location =
-        generator.valueToCode(block, "LOCATION", generator.ORDER_ATOMIC) ||
-        "resourceGroup().location";
-      const sku = block.getFieldValue("SKU");
+        generator.valueToCode(block, 'LOCATION', generator.ORDER_ATOMIC) ||
+        'resourceGroup().location';
+      const sku = block.getFieldValue('SKU');
 
       let code = `resource ${name} 'Microsoft.Storage/storageAccounts@2021-04-01' = {\n`;
       code += `  name: ${storageName}\n`;
@@ -111,20 +107,18 @@ export class BicepGenerator {
     };
 
     // Virtual Network block
-    generator.forBlock["bicep_virtual_network"] = function (block: {
+    generator.forBlock['bicep_virtual_network'] = function (block: {
       getFieldValue: (n: string) => string;
       inputList?: unknown[];
     }) {
-      const name = block.getFieldValue("NAME");
+      const name = block.getFieldValue('NAME');
       const vnetName =
-        generator.valueToCode(block, "VNET_NAME", generator.ORDER_ATOMIC) ||
-        "'defaultVNet'";
+        generator.valueToCode(block, 'VNET_NAME', generator.ORDER_ATOMIC) || "'defaultVNet'";
       const location =
-        generator.valueToCode(block, "LOCATION", generator.ORDER_ATOMIC) ||
-        "resourceGroup().location";
+        generator.valueToCode(block, 'LOCATION', generator.ORDER_ATOMIC) ||
+        'resourceGroup().location';
       const addressSpace =
-        generator.valueToCode(block, "ADDRESS_SPACE", generator.ORDER_ATOMIC) ||
-        "'10.0.0.0/16'";
+        generator.valueToCode(block, 'ADDRESS_SPACE', generator.ORDER_ATOMIC) || "'10.0.0.0/16'";
 
       let code = `resource ${name} 'Microsoft.Network/virtualNetworks@2021-02-01' = {\n`;
       code += `  name: ${vnetName}\n`;
@@ -142,14 +136,12 @@ export class BicepGenerator {
     };
 
     // Feature Flag block
-    generator.forBlock["bicep_feature_flag"] = function (
+    generator.forBlock['bicep_feature_flag'] = function (
       this: { options: BicepCodeGenerationOptions },
-      block: { getFieldValue: (n: string) => string; inputList?: unknown[] },
+      block: { getFieldValue: (n: string) => string; inputList?: unknown[] }
     ) {
-      const environment = block.getFieldValue("ENVIRONMENT");
-      const value =
-        generator.valueToCode(block, "FLAG_VALUE", generator.ORDER_ATOMIC) ||
-        "false";
+      const environment = block.getFieldValue('ENVIRONMENT');
+      const value = generator.valueToCode(block, 'FLAG_VALUE', generator.ORDER_ATOMIC) || 'false';
 
       // In a real implementation, this would check the current environment
       // and return the appropriate value based on the environment
@@ -157,43 +149,42 @@ export class BicepGenerator {
       if (environment === self.options.environment) {
         return [value, generator.ORDER_ATOMIC];
       } else {
-        return ["false", generator.ORDER_ATOMIC];
+        return ['false', generator.ORDER_ATOMIC];
       }
     }.bind({ options: this.options, moduleOutputs: this.moduleOutputs });
 
     // Conditional deployment block
-    generator.forBlock["bicep_conditional_deployment"] = function (block: {
+    generator.forBlock['bicep_conditional_deployment'] = function (block: {
       getFieldValue: (n: string) => string;
       inputList?: unknown[];
     }) {
       const condition =
-        generator.valueToCode(block, "CONDITION", generator.ORDER_ATOMIC) ||
-        "false";
-      const resources = generator.statementToCode(block, "RESOURCES");
+        generator.valueToCode(block, 'CONDITION', generator.ORDER_ATOMIC) || 'false';
+      const resources = generator.statementToCode(block, 'RESOURCES');
 
       let code = `// Conditional deployment based on: ${condition}\n`;
       code += resources
-        .split("\n")
+        .split('\n')
         .map((line: string) => {
-          if (line.trim().startsWith("resource ")) {
-            const parts = line.split("=");
+          if (line.trim().startsWith('resource ')) {
+            const parts = line.split('=');
             if (parts.length > 1) {
               return `${parts[0]}= if (${condition}) {\n`;
             }
           }
           return line;
         })
-        .join("\n");
+        .join('\n');
 
       return code;
     };
 
     // String literal block
-    generator.forBlock["bicep_string_literal"] = function (block: {
+    generator.forBlock['bicep_string_literal'] = function (block: {
       getFieldValue: (n: string) => string;
       inputList?: unknown[];
     }) {
-      const text = block.getFieldValue("TEXT");
+      const text = block.getFieldValue('TEXT');
       return [`'${text}'`, generator.ORDER_ATOMIC];
     };
 
@@ -206,13 +197,12 @@ export class BicepGenerator {
    * @param generator Blockly generator
    */
   private defineModuleBlockGenerator(generator: GeneratorLike): void {
-    generator.forBlock["bicep_module"] = function (
+    generator.forBlock['bicep_module'] = function (
       this: { moduleOutputs: Record<string, { type: string; block: string }> },
-      block: { getFieldValue: (n: string) => string; inputList?: unknown[] },
+      block: { getFieldValue: (n: string) => string; inputList?: unknown[] }
     ) {
-      const moduleName = block.getFieldValue("MODULE_NAME");
-      const modulePath =
-        block.getFieldValue("MODULE_PATH") || "./modules/default.bicep";
+      const moduleName = block.getFieldValue('MODULE_NAME');
+      const modulePath = block.getFieldValue('MODULE_PATH') || './modules/default.bicep';
 
       let code = `module ${moduleName} '${modulePath}' = {\n`;
       code += `  params: {\n`;
@@ -220,11 +210,11 @@ export class BicepGenerator {
       // Get all parameter inputs
       const paramInputs = (block.inputList as { name?: string }[]).filter(
         (input): input is { name: string } =>
-          Boolean(input.name) && (input.name as string).startsWith("PARAM_"),
+          Boolean(input.name) && (input.name as string).startsWith('PARAM_')
       );
 
       // Generate code for each parameter
-      paramInputs.forEach((input) => {
+      paramInputs.forEach(input => {
         const paramName = input.name.substring(6); // Remove 'PARAM_' prefix
         let paramValue;
 
@@ -237,9 +227,7 @@ export class BicepGenerator {
         if (field) {
           paramValue = `'${field.getValue()}'`;
         } else {
-          paramValue =
-            generator.valueToCode(block, input.name, generator.ORDER_ATOMIC) ||
-            "null";
+          paramValue = generator.valueToCode(block, input.name, generator.ORDER_ATOMIC) || 'null';
         }
 
         code += `    ${paramName}: ${paramValue}\n`;
@@ -255,15 +243,13 @@ export class BicepGenerator {
             outputConnections?: { name: string; type: string }[];
           }
         ).outputConnections ?? [];
-      outputConnections.forEach(
-        (connection: { name: string; type: string }) => {
-          const outputName = connection.name.substring(7); // Remove 'OUTPUT_' prefix
-          this.moduleOutputs[`${moduleName}.outputs.${outputName}`] = {
-            type: connection.type,
-            block: moduleName,
-          };
-        },
-      );
+      outputConnections.forEach((connection: { name: string; type: string }) => {
+        const outputName = connection.name.substring(7); // Remove 'OUTPUT_' prefix
+        this.moduleOutputs[`${moduleName}.outputs.${outputName}`] = {
+          type: connection.type,
+          block: moduleName,
+        };
+      });
 
       return code;
     }.bind({ options: this.options, moduleOutputs: this.moduleOutputs });
@@ -284,10 +270,7 @@ export class BicepGenerator {
 
     // Generate code from workspace
     code += (
-      Blockly as unknown as Record<
-        string,
-        { workspaceToCode: (w: Blockly.WorkspaceSvg) => string }
-      >
+      Blockly as unknown as Record<string, { workspaceToCode: (w: Blockly.WorkspaceSvg) => string }>
     ).Bicep.workspaceToCode(this.workspace);
 
     return code;
