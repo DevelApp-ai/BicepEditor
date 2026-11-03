@@ -1,4 +1,9 @@
-import { ModuleMetadata, ModuleOutput, ModuleParameter, ModuleResource } from './types';
+import {
+  ModuleMetadata,
+  ModuleOutput,
+  ModuleParameter,
+  ModuleResource,
+} from "./types";
 
 /**
  * Shared Bicep module parser. Works on file contents regardless of whether
@@ -7,7 +12,7 @@ import { ModuleMetadata, ModuleOutput, ModuleParameter, ModuleResource } from '.
 export class BicepModuleParser {
   parse(fileName: string, content: string, sourcePath: string): ModuleMetadata {
     return {
-      moduleName: fileName.replace(/\.bicep$/i, ''),
+      moduleName: fileName.replace(/\.bicep$/i, ""),
       moduleSource: sourcePath,
       modulePath: sourcePath,
       description: this.extractDescription(content),

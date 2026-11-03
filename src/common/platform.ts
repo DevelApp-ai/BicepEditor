@@ -1,4 +1,4 @@
-import { ModuleMetadata, RepositoryConfig } from './types';
+import { ModuleMetadata, RepositoryConfig } from "./types";
 
 /**
  * Result of adding a repository to the module toolbox.
@@ -28,16 +28,21 @@ export class AppError extends Error {
   readonly platform: Platform;
   readonly detail?: unknown;
 
-  constructor(code: string, message: string, platform: Platform, detail?: unknown) {
+  constructor(
+    code: string,
+    message: string,
+    platform: Platform,
+    detail?: unknown,
+  ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
     this.code = code;
     this.platform = platform;
     this.detail = detail;
   }
 }
 
-export type Platform = 'electron' | 'browser';
+export type Platform = "electron" | "browser";
 
 /**
  * Platform-agnostic service API used by the renderer.
@@ -51,7 +56,7 @@ export interface PlatformServices {
   addRepository(
     repoUrl: string,
     branch: string,
-    auth: { type: 'none' | 'pat'; token?: string }
+    auth: { type: "none" | "pat"; token?: string },
   ): Promise<RepositoryResult>;
   refreshRepository(repoId: string): Promise<RepositoryResult>;
   listRepositories(): Promise<RepositoryConfig[]>;
@@ -63,7 +68,7 @@ export interface PlatformServices {
   listProjects(): Promise<ProjectRecord[]>;
   saveBicepFile(
     fileName: string,
-    content: string
+    content: string,
   ): Promise<{ path: string; success: boolean } | null>;
   openBicepFile(): Promise<{ path: string; content: string } | null>;
 }

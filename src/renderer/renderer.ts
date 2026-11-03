@@ -1,7 +1,7 @@
-import * as Blockly from 'blockly';
-import { BrowserServices } from '../common/browser-services';
-import { ElectronServices } from '../common/electron-services';
-import { AppError, PlatformServices, ProjectRecord } from '../common/platform';
+import * as Blockly from "blockly";
+import { BrowserServices } from "../common/browser-services";
+import { ElectronServices } from "../common/electron-services";
+import { AppError, PlatformServices, ProjectRecord } from "../common/platform";
 
 /**
  * Resolve the platform service layer at runtime:
@@ -20,7 +20,9 @@ async function resolveServices(): Promise<PlatformServices> {
 
 const servicesPromise: Promise<PlatformServices> = resolveServices();
 
-async function withServices<T>(operation: (services: PlatformServices) => Promise<T>): Promise<T> {
+async function withServices<T>(
+  operation: (services: PlatformServices) => Promise<T>,
+): Promise<T> {
   const services = await servicesPromise;
   try {
     return await operation(services);
@@ -29,10 +31,10 @@ async function withServices<T>(operation: (services: PlatformServices) => Promis
       error instanceof AppError
         ? error
         : new AppError(
-            'ERR_UNKNOWN',
+            "ERR_UNKNOWN",
             error instanceof Error ? error.message : String(error),
             services.platform,
-            error
+            error,
           );
     console.error(`[${appError.code}] ${appError.message}`);
     throw appError;
@@ -40,7 +42,7 @@ async function withServices<T>(operation: (services: PlatformServices) => Promis
 }
 
 // Initialize application when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   initializeBlockly();
   setupEventListeners();
   setupTabSwitching();
@@ -49,38 +51,38 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize Blockly workspace
 function initializeBlockly() {
   const toolbox = {
-    kind: 'categoryToolbox',
+    kind: "categoryToolbox",
     contents: [
       {
-        kind: 'category',
-        name: 'Core Resources',
-        colour: '#5C81A6',
+        kind: "category",
+        name: "Core Resources",
+        colour: "#5C81A6",
         contents: [],
       },
       {
-        kind: 'category',
-        name: 'Modules',
-        colour: '#5CA65C',
+        kind: "category",
+        name: "Modules",
+        colour: "#5CA65C",
         contents: [],
       },
       {
-        kind: 'category',
-        name: 'Feature Flags',
-        colour: '#A65C81',
+        kind: "category",
+        name: "Feature Flags",
+        colour: "#A65C81",
         contents: [],
       },
     ],
   };
 
-  const workspace = Blockly.inject('blocklyDiv', {
+  const workspace = Blockly.inject("blocklyDiv", {
     toolbox: toolbox,
     // Serve Blockly media (sprites/sounds) from the app origin; the default
     // CDN host would be blocked by the strict CSP.
-    media: new URL('media/', document.baseURI).toString(),
+    media: new URL("media/", document.baseURI).toString(),
     grid: {
       spacing: 20,
       length: 3,
-      colour: '#ccc',
+      colour: "#ccc",
       snap: true,
     },
     zoom: {
@@ -103,7 +105,7 @@ function initializeBlockly() {
 function updateCodePreview() {
   const code =
     "param storageAccountName string\nparam location string = resourceGroup().location\n\nresource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {\n  name: storageAccountName\n  location: location\n  sku: {\n    name: 'Standard_LRS'\n  }\n  kind: 'StorageV2'\n}";
-  const codePreview = document.getElementById('generatedCode');
+  const codePreview = document.getElementById("generatedCode");
   if (codePreview) {
     codePreview.textContent = code;
   }
@@ -111,21 +113,21 @@ function updateCodePreview() {
 
 // Set up event listeners for UI elements
 function setupEventListeners() {
-  const newFileButton = document.getElementById('newFile');
+  const newFileButton = document.getElementById("newFile");
   if (newFileButton) {
-    newFileButton.addEventListener('click', () => {
+    newFileButton.addEventListener("click", () => {
       const workspace = Blockly.getMainWorkspace();
       workspace.clear();
     });
   }
 
-  const openFileButton = document.getElementById('openFile');
+  const openFileButton = document.getElementById("openFile");
   if (openFileButton) {
-    openFileButton.addEventListener('click', () => {
-      void withServices(async services => {
+    openFileButton.addEventListener("click", () => {
+      void withServices(async (services) => {
         const result = await services.openBicepFile();
         if (result) {
-          const codePreview = document.getElementById('generatedCode');
+          const codePreview = document.getElementById("generatedCode");
           if (codePreview) {
             codePreview.textContent = result.content;
           }
@@ -134,31 +136,31 @@ function setupEventListeners() {
     });
   }
 
-  const saveFileButton = document.getElementById('saveFile');
+  const saveFileButton = document.getElementById("saveFile");
   if (saveFileButton) {
-    saveFileButton.addEventListener('click', () => {
-      void withServices(async services => {
-        const codePreview = document.getElementById('generatedCode');
-        const content = codePreview?.textContent ?? '';
+    saveFileButton.addEventListener("click", () => {
+      void withServices(async (services) => {
+        const codePreview = document.getElementById("generatedCode");
+        const content = codePreview?.textContent ?? "";
         const project: ProjectRecord = {
           id: `project-${Date.now()}`,
-          name: 'main',
+          name: "main",
           content,
           updatedAt: Date.now(),
         };
         await services.saveProject(project);
-        await services.saveBicepFile('main.bicep', content);
+        await services.saveBicepFile("main.bicep", content);
       });
     });
   }
 
   const environmentSelector = document.getElementById(
-    'environmentSelector'
+    "environmentSelector",
   ) as HTMLSelectElement | null;
   if (environmentSelector) {
-    environmentSelector.addEventListener('change', () => {
+    environmentSelector.addEventListener("change", () => {
       const environment = environmentSelector.value;
-      void withServices(async services => {
+      void withServices(async (services) => {
         const flags = await services.loadFeatureFlags(environment);
         console.log(`Loaded feature flags for ${environment}:`, flags);
       });
@@ -168,19 +170,19 @@ function setupEventListeners() {
 
 // Set up tab switching in the bottom panel
 function setupTabSwitching() {
-  const tabButtons = document.querySelectorAll('.tab-button');
-  const tabContents = document.querySelectorAll('.tab-content');
+  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabContents = document.querySelectorAll(".tab-content");
 
-  tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      tabContents.forEach(content => content.classList.remove('active'));
-      button.classList.add('active');
-      const tabId = button.getAttribute('data-tab');
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      tabButtons.forEach((btn) => btn.classList.remove("active"));
+      tabContents.forEach((content) => content.classList.remove("active"));
+      button.classList.add("active");
+      const tabId = button.getAttribute("data-tab");
       if (tabId) {
         const tabContent = document.getElementById(tabId);
         if (tabContent) {
-          tabContent.classList.add('active');
+          tabContent.classList.add("active");
         }
       }
     });

@@ -1,7 +1,7 @@
-import { ipcMain } from 'electron';
-import * as fs from 'fs';
-import * as path from 'path';
-import { EnvironmentConfig, FeatureFlag } from '../common/types';
+import { ipcMain } from "electron";
+import * as fs from "fs";
+import * as path from "path";
+import { EnvironmentConfig, FeatureFlag } from "../common/types";
 
 /**
  * FeatureFlagManager class for managing environment-specific feature flags
@@ -9,7 +9,12 @@ import { EnvironmentConfig, FeatureFlag } from '../common/types';
 export class FeatureFlagManager {
   private configPath: string;
   private environments: Map<string, EnvironmentConfig>;
-  private defaultEnvironments: string[] = ['development', 'testing', 'staging', 'production'];
+  private defaultEnvironments: string[] = [
+    "development",
+    "testing",
+    "staging",
+    "production",
+  ];
 
   /**
    * Constructor
@@ -32,7 +37,7 @@ export class FeatureFlagManager {
     }
 
     // Create environment config file if it doesn't exist
-    const configFile = path.join(this.configPath, 'environments.json');
+    const configFile = path.join(this.configPath, "environments.json");
     if (!fs.existsSync(configFile)) {
       this.createDefaultEnvironments();
       this.saveEnvironments();
@@ -45,33 +50,33 @@ export class FeatureFlagManager {
    * Create default environments
    */
   private createDefaultEnvironments(): void {
-    this.defaultEnvironments.forEach(envName => {
+    this.defaultEnvironments.forEach((envName) => {
       this.environments.set(envName, {
         name: envName,
         featureFlags: [
           {
-            name: 'enableHighAvailability',
-            type: 'boolean',
-            value: envName === 'production' || envName === 'staging',
-            description: 'Enable high availability features',
+            name: "enableHighAvailability",
+            type: "boolean",
+            value: envName === "production" || envName === "staging",
+            description: "Enable high availability features",
           },
           {
-            name: 'replicaCount',
-            type: 'number',
-            value: envName === 'production' ? 3 : envName === 'staging' ? 2 : 1,
-            description: 'Number of replicas to deploy',
+            name: "replicaCount",
+            type: "number",
+            value: envName === "production" ? 3 : envName === "staging" ? 2 : 1,
+            description: "Number of replicas to deploy",
           },
           {
-            name: 'enableGeoRedundancy',
-            type: 'boolean',
-            value: envName === 'production',
-            description: 'Enable geo-redundant storage',
+            name: "enableGeoRedundancy",
+            type: "boolean",
+            value: envName === "production",
+            description: "Enable geo-redundant storage",
           },
           {
-            name: 'storageTier',
-            type: 'string',
-            value: envName === 'production' ? 'Premium' : 'Standard',
-            description: 'Storage tier to use',
+            name: "storageTier",
+            type: "string",
+            value: envName === "production" ? "Premium" : "Standard",
+            description: "Storage tier to use",
           },
         ],
       });
@@ -83,8 +88,8 @@ export class FeatureFlagManager {
    */
   private loadEnvironments(): void {
     try {
-      const configFile = path.join(this.configPath, 'environments.json');
-      const data = fs.readFileSync(configFile, 'utf8');
+      const configFile = path.join(this.configPath, "environments.json");
+      const data = fs.readFileSync(configFile, "utf8");
       const environments = JSON.parse(data);
 
       this.environments.clear();
@@ -92,7 +97,7 @@ export class FeatureFlagManager {
         this.environments.set(env.name, env);
       });
     } catch (error) {
-      console.error('Error loading environments:', error);
+      console.error("Error loading environments:", error);
       this.createDefaultEnvironments();
     }
   }
@@ -102,11 +107,15 @@ export class FeatureFlagManager {
    */
   private saveEnvironments(): void {
     try {
-      const configFile = path.join(this.configPath, 'environments.json');
+      const configFile = path.join(this.configPath, "environments.json");
       const environments = Array.from(this.environments.values());
-      fs.writeFileSync(configFile, JSON.stringify(environments, null, 2), 'utf8');
+      fs.writeFileSync(
+        configFile,
+        JSON.stringify(environments, null, 2),
+        "utf8",
+      );
     } catch (error) {
-      console.error('Error saving environments:', error);
+      console.error("Error saving environments:", error);
     }
   }
 
@@ -115,22 +124,25 @@ export class FeatureFlagManager {
    */
   private setupIpcHandlers(): void {
     // Load feature flags for an environment
-    ipcMain.handle('feature-flags-load', async (_event, environment: string) => {
-      try {
-        const env = this.environments.get(environment);
-        if (!env) {
-          throw new Error(`Environment ${environment} not found`);
+    ipcMain.handle(
+      "feature-flags-load",
+      async (_event, environment: string) => {
+        try {
+          const env = this.environments.get(environment);
+          if (!env) {
+            throw new Error(`Environment ${environment} not found`);
+          }
+          return env.featureFlags;
+        } catch (error) {
+          console.error("Error loading feature flags:", error);
+          throw error;
         }
-        return env.featureFlags;
-      } catch (error) {
-        console.error('Error loading feature flags:', error);
-        throw error;
-      }
-    });
+      },
+    );
 
     // Save feature flags for an environment
     ipcMain.handle(
-      'feature-flags-save',
+      "feature-flags-save",
       async (_event, environment: string, flags: FeatureFlag[]) => {
         try {
           const env = this.environments.get(environment);
@@ -147,63 +159,69 @@ export class FeatureFlagManager {
           this.saveEnvironments();
           return true;
         } catch (error) {
-          console.error('Error saving feature flags:', error);
+          console.error("Error saving feature flags:", error);
           throw error;
         }
-      }
+      },
     );
 
     // List all environments
-    ipcMain.handle('feature-flags-list-environments', async () => {
+    ipcMain.handle("feature-flags-list-environments", async () => {
       try {
         return Array.from(this.environments.keys());
       } catch (error) {
-        console.error('Error listing environments:', error);
+        console.error("Error listing environments:", error);
         throw error;
       }
     });
 
     // Create a new environment
-    ipcMain.handle('feature-flags-create-environment', async (_event, environment: string) => {
-      try {
-        if (this.environments.has(environment)) {
-          throw new Error(`Environment ${environment} already exists`);
+    ipcMain.handle(
+      "feature-flags-create-environment",
+      async (_event, environment: string) => {
+        try {
+          if (this.environments.has(environment)) {
+            throw new Error(`Environment ${environment} already exists`);
+          }
+
+          // Create new environment with default flags
+          this.environments.set(environment, {
+            name: environment,
+            featureFlags: [],
+          });
+
+          this.saveEnvironments();
+          return true;
+        } catch (error) {
+          console.error("Error creating environment:", error);
+          throw error;
         }
-
-        // Create new environment with default flags
-        this.environments.set(environment, {
-          name: environment,
-          featureFlags: [],
-        });
-
-        this.saveEnvironments();
-        return true;
-      } catch (error) {
-        console.error('Error creating environment:', error);
-        throw error;
-      }
-    });
+      },
+    );
 
     // Delete an environment
-    ipcMain.handle('feature-flags-delete-environment', async (_event, environment: string) => {
-      try {
-        if (!this.environments.has(environment)) {
-          throw new Error(`Environment ${environment} not found`);
-        }
+    ipcMain.handle(
+      "feature-flags-delete-environment",
+      async (_event, environment: string) => {
+        try {
+          if (!this.environments.has(environment)) {
+            throw new Error(`Environment ${environment} not found`);
+          }
 
-        // Don't allow deleting default environments
-        if (this.defaultEnvironments.includes(environment)) {
-          throw new Error(`Cannot delete default environment ${environment}`);
-        }
+          // Don't allow deleting default environments
+          if (this.defaultEnvironments.includes(environment)) {
+            throw new Error(`Cannot delete default environment ${environment}`);
+          }
 
-        this.environments.delete(environment);
-        this.saveEnvironments();
-        return true;
-      } catch (error) {
-        console.error('Error deleting environment:', error);
-        throw error;
-      }
-    });
+          this.environments.delete(environment);
+          this.saveEnvironments();
+          return true;
+        } catch (error) {
+          console.error("Error deleting environment:", error);
+          throw error;
+        }
+      },
+    );
   }
 
   /**
@@ -231,7 +249,7 @@ export class FeatureFlagManager {
       return undefined;
     }
 
-    const flag = env.featureFlags.find(f => f.name === flagName);
+    const flag = env.featureFlags.find((f) => f.name === flagName);
     return flag ? flag.value : undefined;
   }
 }

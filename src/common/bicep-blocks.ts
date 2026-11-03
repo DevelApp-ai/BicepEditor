@@ -1,6 +1,6 @@
-import * as Blockly from 'blockly';
-import { ModuleMetadata, ModuleOutput, ModuleParameter } from './types';
-import { BicepModuleBlockDefinition } from '../common/types';
+import * as Blockly from "blockly";
+import { ModuleMetadata, ModuleOutput, ModuleParameter } from "./types";
+import { BicepModuleBlockDefinition } from "../common/types";
 
 /**
  * BicepBlockFactory class for creating and managing Bicep blocks
@@ -13,178 +13,178 @@ export class BicepBlockFactory {
     // Storage Account block
     Blockly.common.defineBlocksWithJsonArray([
       {
-        type: 'bicep_storage_account',
-        message0: 'Storage Account %1',
+        type: "bicep_storage_account",
+        message0: "Storage Account %1",
         args0: [
           {
-            type: 'field_input',
-            name: 'NAME',
-            text: 'storageAccount',
+            type: "field_input",
+            name: "NAME",
+            text: "storageAccount",
           },
         ],
-        message1: 'Name: %1',
+        message1: "Name: %1",
         args1: [
           {
-            type: 'input_value',
-            name: 'STORAGE_NAME',
-            check: 'String',
+            type: "input_value",
+            name: "STORAGE_NAME",
+            check: "String",
           },
         ],
-        message2: 'Location: %1',
+        message2: "Location: %1",
         args2: [
           {
-            type: 'input_value',
-            name: 'LOCATION',
-            check: 'String',
+            type: "input_value",
+            name: "LOCATION",
+            check: "String",
           },
         ],
-        message3: 'SKU: %1',
+        message3: "SKU: %1",
         args3: [
           {
-            type: 'field_dropdown',
-            name: 'SKU',
+            type: "field_dropdown",
+            name: "SKU",
             options: [
-              ['Standard_LRS', 'Standard_LRS'],
-              ['Standard_GRS', 'Standard_GRS'],
-              ['Standard_RAGRS', 'Standard_RAGRS'],
-              ['Premium_LRS', 'Premium_LRS'],
+              ["Standard_LRS", "Standard_LRS"],
+              ["Standard_GRS", "Standard_GRS"],
+              ["Standard_RAGRS", "Standard_RAGRS"],
+              ["Premium_LRS", "Premium_LRS"],
             ],
           },
         ],
-        previousStatement: 'BicepResource',
-        nextStatement: 'BicepResource',
+        previousStatement: "BicepResource",
+        nextStatement: "BicepResource",
         colour: 160,
-        tooltip: 'Creates an Azure Storage Account',
+        tooltip: "Creates an Azure Storage Account",
         helpUrl:
-          'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts',
+          "https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts",
       },
     ]);
 
     // Virtual Network block
     Blockly.common.defineBlocksWithJsonArray([
       {
-        type: 'bicep_virtual_network',
-        message0: 'Virtual Network %1',
+        type: "bicep_virtual_network",
+        message0: "Virtual Network %1",
         args0: [
           {
-            type: 'field_input',
-            name: 'NAME',
-            text: 'vnet',
+            type: "field_input",
+            name: "NAME",
+            text: "vnet",
           },
         ],
-        message1: 'Name: %1',
+        message1: "Name: %1",
         args1: [
           {
-            type: 'input_value',
-            name: 'VNET_NAME',
-            check: 'String',
+            type: "input_value",
+            name: "VNET_NAME",
+            check: "String",
           },
         ],
-        message2: 'Location: %1',
+        message2: "Location: %1",
         args2: [
           {
-            type: 'input_value',
-            name: 'LOCATION',
-            check: 'String',
+            type: "input_value",
+            name: "LOCATION",
+            check: "String",
           },
         ],
-        message3: 'Address Space: %1',
+        message3: "Address Space: %1",
         args3: [
           {
-            type: 'input_value',
-            name: 'ADDRESS_SPACE',
-            check: 'String',
+            type: "input_value",
+            name: "ADDRESS_SPACE",
+            check: "String",
           },
         ],
-        previousStatement: 'BicepResource',
-        nextStatement: 'BicepResource',
+        previousStatement: "BicepResource",
+        nextStatement: "BicepResource",
         colour: 210,
-        tooltip: 'Creates an Azure Virtual Network',
+        tooltip: "Creates an Azure Virtual Network",
         helpUrl:
-          'https://learn.microsoft.com/en-us/azure/templates/microsoft.network/virtualnetworks',
+          "https://learn.microsoft.com/en-us/azure/templates/microsoft.network/virtualnetworks",
       },
     ]);
 
     // Feature Flag block
     Blockly.common.defineBlocksWithJsonArray([
       {
-        type: 'bicep_feature_flag',
-        message0: 'Feature Flag: %1',
+        type: "bicep_feature_flag",
+        message0: "Feature Flag: %1",
         args0: [
           {
-            type: 'field_input',
-            name: 'FLAG_NAME',
-            text: 'enableHighAvailability',
+            type: "field_input",
+            name: "FLAG_NAME",
+            text: "enableHighAvailability",
           },
         ],
-        message1: 'Environment: %1',
+        message1: "Environment: %1",
         args1: [
           {
-            type: 'field_dropdown',
-            name: 'ENVIRONMENT',
+            type: "field_dropdown",
+            name: "ENVIRONMENT",
             options: [
-              ['Development', 'development'],
-              ['Testing', 'testing'],
-              ['Staging', 'staging'],
-              ['Production', 'production'],
+              ["Development", "development"],
+              ["Testing", "testing"],
+              ["Staging", "staging"],
+              ["Production", "production"],
             ],
           },
         ],
-        message2: 'Value: %1',
+        message2: "Value: %1",
         args2: [
           {
-            type: 'input_value',
-            name: 'FLAG_VALUE',
+            type: "input_value",
+            name: "FLAG_VALUE",
           },
         ],
-        output: 'Boolean',
+        output: "Boolean",
         colour: 290,
-        tooltip: 'Environment-specific feature flag',
+        tooltip: "Environment-specific feature flag",
       },
     ]);
 
     // Conditional deployment block
     Blockly.common.defineBlocksWithJsonArray([
       {
-        type: 'bicep_conditional_deployment',
-        message0: 'Deploy if %1',
+        type: "bicep_conditional_deployment",
+        message0: "Deploy if %1",
         args0: [
           {
-            type: 'input_value',
-            name: 'CONDITION',
-            check: 'Boolean',
+            type: "input_value",
+            name: "CONDITION",
+            check: "Boolean",
           },
         ],
-        message1: 'Resources: %1',
+        message1: "Resources: %1",
         args1: [
           {
-            type: 'input_statement',
-            name: 'RESOURCES',
-            check: 'BicepResource',
+            type: "input_statement",
+            name: "RESOURCES",
+            check: "BicepResource",
           },
         ],
         previousStatement: null,
         nextStatement: null,
         colour: 120,
-        tooltip: 'Conditionally deploy resources based on a condition',
+        tooltip: "Conditionally deploy resources based on a condition",
       },
     ]);
 
     // String literal block
     Blockly.common.defineBlocksWithJsonArray([
       {
-        type: 'bicep_string_literal',
-        message0: 'String: %1',
+        type: "bicep_string_literal",
+        message0: "String: %1",
         args0: [
           {
-            type: 'field_input',
-            name: 'TEXT',
-            text: '',
+            type: "field_input",
+            name: "TEXT",
+            text: "",
           },
         ],
-        output: 'String',
+        output: "String",
         colour: 330,
-        tooltip: 'A string value',
+        tooltip: "A string value",
       },
     ]);
   }
@@ -193,7 +193,7 @@ export class BicepBlockFactory {
    * Create a block definition for a Bicep module
    */
   public static createModuleBlockDefinition(
-    moduleMetadata: ModuleMetadata
+    moduleMetadata: ModuleMetadata,
   ): BicepModuleBlockDefinition {
     // Create the basic block structure
     const blockDef: BicepModuleBlockDefinition & Record<string, unknown> = {
@@ -201,24 +201,26 @@ export class BicepBlockFactory {
       message0: `Module: ${moduleMetadata.moduleName} %1`,
       args0: [
         {
-          type: 'field_label',
+          type: "field_label",
           text: `from ${moduleMetadata.moduleSource}`,
         },
       ],
-      output: 'BicepModule',
+      output: "BicepModule",
       outputConnections: [],
       colour: 230,
-      tooltip: moduleMetadata.description || `Module from ${moduleMetadata.moduleSource}`,
+      tooltip:
+        moduleMetadata.description ||
+        `Module from ${moduleMetadata.moduleSource}`,
       helpUrl: `${moduleMetadata.moduleSource}/${moduleMetadata.modulePath}`,
     };
 
     // Add module name input
     let messageIndex = 1;
-    blockDef[`message${messageIndex}`] = 'Name: %1';
+    blockDef[`message${messageIndex}`] = "Name: %1";
     blockDef[`args${messageIndex}`] = [
       {
-        type: 'field_input',
-        name: 'MODULE_NAME',
+        type: "field_input",
+        name: "MODULE_NAME",
         text: moduleMetadata.moduleName,
       },
     ];
@@ -233,7 +235,7 @@ export class BicepBlockFactory {
         // Dropdown for allowed values
         blockDef[`args${messageIndex}`] = [
           {
-            type: 'field_dropdown',
+            type: "field_dropdown",
             name: `PARAM_${param.name}`,
             options: param.allowedValues.map((value: string) => [value, value]),
           },
@@ -242,7 +244,7 @@ export class BicepBlockFactory {
         // Input value for other types
         blockDef[`args${messageIndex}`] = [
           {
-            type: 'input_value',
+            type: "input_value",
             name: `PARAM_${param.name}`,
             check: param.type.charAt(0).toUpperCase() + param.type.slice(1),
           },
@@ -266,7 +268,9 @@ export class BicepBlockFactory {
   /**
    * Register a module block with Blockly
    */
-  public static registerModuleBlock(blockDef: BicepModuleBlockDefinition): void {
+  public static registerModuleBlock(
+    blockDef: BicepModuleBlockDefinition,
+  ): void {
     Blockly.common.defineBlocksWithJsonArray([blockDef]);
   }
 }

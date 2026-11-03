@@ -1,8 +1,8 @@
-import { ipcMain, dialog, BrowserWindow } from 'electron';
-import * as fs from 'fs';
-import * as path from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { ipcMain, dialog, BrowserWindow } from "electron";
+import * as fs from "fs";
+import * as path from "path";
+import { exec } from "child_process";
+import { promisify } from "util";
 
 const execAsync = promisify(exec);
 
@@ -29,20 +29,20 @@ export class BicepFileManager {
    */
   private setupIpcHandlers(): void {
     // Open Bicep file
-    ipcMain.handle('file-open-bicep', async event => {
+    ipcMain.handle("file-open-bicep", async (event) => {
       try {
         const window = BrowserWindow.fromWebContents(event.sender);
         if (!window) {
-          throw new Error('Window not found');
+          throw new Error("Window not found");
         }
 
         const result = await dialog.showOpenDialog(window, {
-          title: 'Open Bicep File',
+          title: "Open Bicep File",
           filters: [
-            { name: 'Bicep Files', extensions: ['bicep'] },
-            { name: 'All Files', extensions: ['*'] },
+            { name: "Bicep Files", extensions: ["bicep"] },
+            { name: "All Files", extensions: ["*"] },
           ],
-          properties: ['openFile'],
+          properties: ["openFile"],
         });
 
         if (result.canceled || result.filePaths.length === 0) {
@@ -50,7 +50,7 @@ export class BicepFileManager {
         }
 
         const filePath = result.filePaths[0];
-        const content = fs.readFileSync(filePath, 'utf8');
+        const content = fs.readFileSync(filePath, "utf8");
 
         this.addRecentFile(filePath);
 
@@ -59,76 +59,81 @@ export class BicepFileManager {
           content,
         };
       } catch (error) {
-        console.error('Error opening Bicep file:', error);
+        console.error("Error opening Bicep file:", error);
         throw error;
       }
     });
 
     // Save Bicep file
-    ipcMain.handle('file-save-bicep', async (event, filePath: string, content: string) => {
-      try {
-        let finalPath = filePath;
-        const window = BrowserWindow.fromWebContents(event.sender);
+    ipcMain.handle(
+      "file-save-bicep",
+      async (event, filePath: string, content: string) => {
+        try {
+          let finalPath = filePath;
+          const window = BrowserWindow.fromWebContents(event.sender);
 
-        if (!window) {
-          throw new Error('Window not found');
-        }
-
-        // If no file path provided, show save dialog
-        if (!filePath) {
-          const result = await dialog.showSaveDialog(window, {
-            title: 'Save Bicep File',
-            filters: [
-              { name: 'Bicep Files', extensions: ['bicep'] },
-              { name: 'All Files', extensions: ['*'] },
-            ],
-          });
-
-          if (result.canceled || !result.filePath) {
-            return null;
+          if (!window) {
+            throw new Error("Window not found");
           }
 
-          finalPath = result.filePath;
+          // If no file path provided, show save dialog
+          if (!filePath) {
+            const result = await dialog.showSaveDialog(window, {
+              title: "Save Bicep File",
+              filters: [
+                { name: "Bicep Files", extensions: ["bicep"] },
+                { name: "All Files", extensions: ["*"] },
+              ],
+            });
+
+            if (result.canceled || !result.filePath) {
+              return null;
+            }
+
+            finalPath = result.filePath;
+          }
+
+          fs.writeFileSync(finalPath, content, "utf8");
+          this.addRecentFile(finalPath);
+
+          return {
+            path: finalPath,
+            success: true,
+          };
+        } catch (error) {
+          console.error("Error saving Bicep file:", error);
+          throw error;
         }
-
-        fs.writeFileSync(finalPath, content, 'utf8');
-        this.addRecentFile(finalPath);
-
-        return {
-          path: finalPath,
-          success: true,
-        };
-      } catch (error) {
-        console.error('Error saving Bicep file:', error);
-        throw error;
-      }
-    });
+      },
+    );
 
     // Get recent files
-    ipcMain.handle('file-get-recent', async () => {
+    ipcMain.handle("file-get-recent", async () => {
       try {
         return this.recentFiles;
       } catch (error) {
-        console.error('Error getting recent files:', error);
+        console.error("Error getting recent files:", error);
         throw error;
       }
     });
 
     // Validate Bicep file
-    ipcMain.handle('file-validate-bicep', async (_event, content: string) => {
+    ipcMain.handle("file-validate-bicep", async (_event, content: string) => {
       try {
         // Create temporary file
-        const tempDir = path.join(this.configPath, 'temp');
+        const tempDir = path.join(this.configPath, "temp");
         if (!fs.existsSync(tempDir)) {
           fs.mkdirSync(tempDir, { recursive: true });
         }
 
         const tempFile = path.join(tempDir, `temp_${Date.now()}.bicep`);
-        fs.writeFileSync(tempFile, content, 'utf8');
+        fs.writeFileSync(tempFile, content, "utf8");
 
         try {
           // Run Bicep validation
-          const { stdout } = await execAsync(`az bicep build --file ${tempFile}`);
+          const { stdout } = await execAsync(
+            `az bicep build --file ${tempFile}`,
+          );
 
           // Clean up
           fs.unlinkSync(tempFile);
@@ -147,7 +152,7 @@ export class BicepFileManager {
           };
         }
       } catch (error: unknown) {
-        console.error('Error validating Bicep file:', error);
+        console.error("Error validating Bicep file:", error);
         return {
           valid: false,
           error: error instanceof Error ? error.message : String(error),
@@ -161,14 +166,14 @@ export class BicepFileManager {
    */
   private loadRecentFiles(): void {
     try {
-      const recentFilesPath = path.join(this.configPath, 'recent_files.json');
+      const recentFilesPath = path.join(this.configPath, "recent_files.json");
 
       if (fs.existsSync(recentFilesPath)) {
-        const data = fs.readFileSync(recentFilesPath, 'utf8');
+        const data = fs.readFileSync(recentFilesPath, "utf8");
         this.recentFiles = JSON.parse(data);
       }
     } catch (error) {
-      console.error('Error loading recent files:', error);
+      console.error("Error loading recent files:", error);
       this.recentFiles = [];
     }
   }
@@ -178,10 +183,14 @@ export class BicepFileManager {
    */
   private saveRecentFiles(): void {
     try {
-      const recentFilesPath = path.join(this.configPath, 'recent_files.json');
-      fs.writeFileSync(recentFilesPath, JSON.stringify(this.recentFiles), 'utf8');
+      const recentFilesPath = path.join(this.configPath, "recent_files.json");
+      fs.writeFileSync(
+        recentFilesPath,
+        JSON.stringify(this.recentFiles),
+        "utf8",
+      );
     } catch (error) {
-      console.error('Error saving recent files:', error);
+      console.error("Error saving recent files:", error);
     }
   }
 
@@ -191,7 +200,7 @@ export class BicepFileManager {
    */
   private addRecentFile(filePath: string): void {
     // Remove if already exists
-    this.recentFiles = this.recentFiles.filter(file => file !== filePath);
+    this.recentFiles = this.recentFiles.filter((file) => file !== filePath);
 
     // Add to beginning
     this.recentFiles.unshift(filePath);

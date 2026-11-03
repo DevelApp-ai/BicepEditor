@@ -9,13 +9,13 @@ export interface RepositoryConfig {
   url: string;
   branch: string;
   auth: {
-    type: 'none' | 'pat' | 'ssh';
+    type: "none" | "pat" | "ssh";
     token?: string;
     keyPath?: string;
   };
   paths: string[];
   refresh: {
-    type: 'manual' | 'scheduled';
+    type: "manual" | "scheduled";
     intervalMinutes?: number;
   };
 }
@@ -77,7 +77,7 @@ export interface ModuleMetadata {
  */
 export interface FeatureFlag {
   name: string;
-  type: 'boolean' | 'string' | 'number' | 'object';
+  type: "boolean" | "string" | "number" | "object";
   value: unknown;
   description?: string;
 }

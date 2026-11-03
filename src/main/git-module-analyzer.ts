@@ -1,14 +1,14 @@
-import { ipcMain } from 'electron';
-import * as fs from 'fs';
-import * as path from 'path';
-import { simpleGit } from 'simple-git';
+import { ipcMain } from "electron";
+import * as fs from "fs";
+import * as path from "path";
+import { simpleGit } from "simple-git";
 import {
   ModuleMetadata,
   ModuleOutput,
   ModuleParameter,
   ModuleResource,
   RepositoryConfig,
-} from '../common/types';
+} from "../common/types";
 
 /**
  * GitModuleAnalyzer class for analyzing Bicep modules from git repositories
@@ -35,18 +35,23 @@ export class GitModuleAnalyzer {
   private setupIpcHandlers(): void {
     // Add repository
     ipcMain.handle(
-      'git-add-repository',
-      async (_event, repoUrl: string, branch: string, auth: RepositoryConfig['auth']) => {
+      "git-add-repository",
+      async (
+        _event,
+        repoUrl: string,
+        branch: string,
+        auth: RepositoryConfig["auth"],
+      ) => {
         try {
           const repoId = this.generateRepoId(repoUrl);
           const repoConfig: RepositoryConfig = {
             id: repoId,
             name: this.extractRepoName(repoUrl),
             url: repoUrl,
-            branch: branch || 'main',
-            auth: auth || { type: 'none' },
-            paths: ['/'],
-            refresh: { type: 'manual' },
+            branch: branch || "main",
+            auth: auth || { type: "none" },
+            paths: ["/"],
+            refresh: { type: "manual" },
           };
 
           this.repositories.set(repoId, repoConfig);
@@ -59,14 +64,14 @@ export class GitModuleAnalyzer {
             modules: modules.length,
           };
         } catch (error) {
-          console.error('Error adding repository:', error);
+          console.error("Error adding repository:", error);
           throw error;
         }
-      }
+      },
     );
 
     // Refresh repository
-    ipcMain.handle('git-refresh-repository', async (_event, repoId: string) => {
+    ipcMain.handle("git-refresh-repository", async (_event, repoId: string) => {
       try {
         const repoConfig = this.repositories.get(repoId);
         if (!repoConfig) {
@@ -82,13 +87,13 @@ export class GitModuleAnalyzer {
           modules: modules.length,
         };
       } catch (error) {
-        console.error('Error refreshing repository:', error);
+        console.error("Error refreshing repository:", error);
         throw error;
       }
     });
 
     // List repositories
-    ipcMain.handle('git-list-repositories', async () => {
+    ipcMain.handle("git-list-repositories", async () => {
       try {
         const repos = [];
         for (const [id, repo] of this.repositories.entries()) {
@@ -101,13 +106,13 @@ export class GitModuleAnalyzer {
         }
         return repos;
       } catch (error) {
-        console.error('Error listing repositories:', error);
+        console.error("Error listing repositories:", error);
         throw error;
       }
     });
 
     // List modules
-    ipcMain.handle('module-list', async (_event, repoId: string) => {
+    ipcMain.handle("module-list", async (_event, repoId: string) => {
       try {
         const modules = [];
         for (const [id, module] of this.moduleRegistry.entries()) {
@@ -123,13 +128,13 @@ export class GitModuleAnalyzer {
         }
         return modules;
       } catch (error) {
-        console.error('Error listing modules:', error);
+        console.error("Error listing modules:", error);
         throw error;
       }
     });
 
     // Analyze module
-    ipcMain.handle('module-analyze', async (_event, modulePath: string) => {
+    ipcMain.handle("module-analyze", async (_event, modulePath: string) => {
       try {
         const moduleId = this.generateModuleId(modulePath);
         const module = this.moduleRegistry.get(moduleId);
@@ -140,7 +145,7 @@ export class GitModuleAnalyzer {
 
         return module;
       } catch (error) {
-        console.error('Error analyzing module:', error);
+        console.error("Error analyzing module:", error);
         throw error;
       }
     });
@@ -153,8 +158,8 @@ export class GitModuleAnalyzer {
    */
   private generateRepoId(repoUrl: string): string {
     return Buffer.from(repoUrl)
-      .toString('base64')
-      .replace(/[^a-zA-Z0-9]/g, '');
+      .toString("base64")
+      .replace(/[^a-zA-Z0-9]/g, "");
   }
 
   /**
@@ -164,8 +169,8 @@ export class GitModuleAnalyzer {
    */
   private generateModuleId(modulePath: string): string {
     return Buffer.from(modulePath)
-      .toString('base64')
-      .replace(/[^a-zA-Z0-9]/g, '');
+      .toString("base64")
+      .replace(/[^a-zA-Z0-9]/g, "");
   }
 
   /**
@@ -174,9 +179,10 @@ export class GitModuleAnalyzer {
    * @returns Repository name
    */
   private extractRepoName(repoUrl: string): string {
-    const urlParts = repoUrl.split('/');
+    const urlParts = repoUrl.split("/");
     const repoName =
-      urlParts[urlParts.length - 1].replace('.git', '') || urlParts[urlParts.length - 2];
+      urlParts[urlParts.length - 1].replace(".git", "") ||
+      urlParts[urlParts.length - 2];
     return repoName;
   }
 
@@ -200,10 +206,10 @@ export class GitModuleAnalyzer {
     const git = simpleGit();
 
     // Handle authentication
-    if (repo.auth.type === 'pat') {
+    if (repo.auth.type === "pat") {
       // For PAT authentication, modify the URL to include the token
       const url = new URL(repo.url);
-      url.username = repo.auth.token || '';
+      url.username = repo.auth.token || "";
       await git.clone(url.toString(), repoPath);
     } else {
       // For no authentication or SSH, use the URL as is
@@ -232,7 +238,7 @@ export class GitModuleAnalyzer {
 
     // Pull latest changes
     const git = simpleGit(repoPath);
-    await git.pull('origin', repo.branch);
+    await git.pull("origin", repo.branch);
 
     return repoPath;
   }
@@ -242,7 +248,9 @@ export class GitModuleAnalyzer {
    * @param repo Repository configuration
    * @returns Array of module metadata
    */
-  private async scanForModules(repo: RepositoryConfig): Promise<ModuleMetadata[]> {
+  private async scanForModules(
+    repo: RepositoryConfig,
+  ): Promise<ModuleMetadata[]> {
     const repoPath = path.join(this.cachePath, repo.id);
     const modules: ModuleMetadata[] = [];
 
@@ -252,7 +260,9 @@ export class GitModuleAnalyzer {
 
       // Check if path exists
       if (!fs.existsSync(fullPath)) {
-        console.warn(`Path ${fullPath} does not exist in repository ${repo.name}`);
+        console.warn(
+          `Path ${fullPath} does not exist in repository ${repo.name}`,
+        );
         continue;
       }
 
@@ -292,7 +302,7 @@ export class GitModuleAnalyzer {
       if (item.isDirectory()) {
         // Recursively search subdirectories
         files.push(...this.findBicepFiles(fullPath));
-      } else if (item.isFile() && item.name.endsWith('.bicep')) {
+      } else if (item.isFile() && item.name.endsWith(".bicep")) {
         files.push(fullPath);
       }
     }
@@ -308,17 +318,17 @@ export class GitModuleAnalyzer {
    */
   private async analyzeBicepModule(
     filePath: string,
-    repo: RepositoryConfig
+    repo: RepositoryConfig,
   ): Promise<ModuleMetadata> {
     // Read file content
-    const content = fs.readFileSync(filePath, 'utf8');
+    const content = fs.readFileSync(filePath, "utf8");
 
     // Extract module name from file path
-    const moduleName = path.basename(filePath, '.bicep');
+    const moduleName = path.basename(filePath, ".bicep");
 
     // Extract relative path from repository root
     const repoPath = path.join(this.cachePath, repo.id);
-    const relativePath = filePath.replace(repoPath, '');
+    const relativePath = filePath.replace(repoPath, "");
 
     // Initialize metadata
     const metadata: ModuleMetadata = {
@@ -342,15 +352,15 @@ export class GitModuleAnalyzer {
    */
   private extractDescription(content: string): string | undefined {
     // Look for a comment at the beginning of the file
-    const lines = content.split('\n');
-    let description = '';
+    const lines = content.split("\n");
+    let description = "";
 
     for (const line of lines) {
       const trimmed = line.trim();
 
-      if (trimmed.startsWith('//')) {
+      if (trimmed.startsWith("//")) {
         // Add comment to description
-        description += trimmed.substring(2).trim() + ' ';
+        description += trimmed.substring(2).trim() + " ";
       } else if (trimmed.length > 0) {
         // Stop at first non-comment line
         break;
