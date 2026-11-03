@@ -1,7 +1,10 @@
 import * as Blockly from 'blockly';
 import { BicepCodeGenerationOptions } from '../common/types';
 
-type BicepBlockLike = { getFieldValue: (n: string) => string; inputList?: unknown[] };
+type BicepBlockLike = {
+  getFieldValue: (n: string) => string;
+  inputList?: unknown[];
+};
 type GeneratorLike = {
   forBlock: Record<string, (block: BicepBlockLike) => unknown>;
   valueToCode: (block: BicepBlockLike, name: string, order?: unknown) => string;
@@ -47,7 +50,9 @@ export class BicepGenerator {
    */
   private initializeCodeGenerator(): void {
     // Create a custom generator for Bicep
-    const blocklyNs = Blockly as unknown as { CodeGenerator: new (name: string) => GeneratorLike };
+    const blocklyNs = Blockly as unknown as {
+      CodeGenerator: new (name: string) => GeneratorLike;
+    };
     const bicepGenerator = new blocklyNs.CodeGenerator('Bicep');
 
     // Define order of operations
@@ -215,7 +220,9 @@ export class BicepGenerator {
 
         // Check if the parameter has a field (dropdown) or a connected block (input value)
         const field = (
-          block as unknown as { getField?: (name: string) => { getValue: () => string } | null }
+          block as unknown as {
+            getField?: (name: string) => { getValue: () => string } | null;
+          }
         ).getField?.(input.name);
         if (field) {
           paramValue = `'${field.getValue()}'`;
@@ -231,8 +238,11 @@ export class BicepGenerator {
 
       // Register module outputs
       const outputConnections =
-        (block as unknown as { outputConnections?: { name: string; type: string }[] })
-          .outputConnections ?? [];
+        (
+          block as unknown as {
+            outputConnections?: { name: string; type: string }[];
+          }
+        ).outputConnections ?? [];
       outputConnections.forEach((connection: { name: string; type: string }) => {
         const outputName = connection.name.substring(7); // Remove 'OUTPUT_' prefix
         this.moduleOutputs[`${moduleName}.outputs.${outputName}`] = {

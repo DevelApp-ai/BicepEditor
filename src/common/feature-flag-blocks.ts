@@ -39,7 +39,9 @@ export class FeatureFlagBlockManager {
   public async loadFeatureFlags(): Promise<void> {
     try {
       const api = (
-        window as unknown as { api?: { loadFeatureFlags: (e: string) => Promise<FeatureFlag[]> } }
+        window as unknown as {
+          api?: { loadFeatureFlags: (e: string) => Promise<FeatureFlag[]> };
+        }
       ).api;
       if (!api) {
         this.featureFlags = [];
@@ -128,7 +130,9 @@ export class FeatureFlagBlockManager {
     const toolbox = this.workspace.getToolbox();
     if (toolbox) {
       const toolboxDef = (
-        toolbox as unknown as { getToolboxDef: () => { contents: { name?: string }[] } }
+        toolbox as unknown as {
+          getToolboxDef: () => { contents: { name?: string }[] };
+        }
       ).getToolboxDef();
       toolboxDef.contents = toolboxDef.contents.filter(
         (category: { name?: string }) => category.name !== 'Feature Flags'

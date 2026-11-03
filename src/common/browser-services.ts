@@ -75,7 +75,9 @@ export class GitHubBrowserTransport {
     }
     let response: Response;
     try {
-      response = await this.fetchImpl(`${this.apiBase}${pathSuffix}`, { headers });
+      response = await this.fetchImpl(`${this.apiBase}${pathSuffix}`, {
+        headers,
+      });
     } catch (error) {
       throw new AppError(
         'ERR_NETWORK',
